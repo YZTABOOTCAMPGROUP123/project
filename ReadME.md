@@ -35,9 +35,11 @@ Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıc
 
 ## Hedef Kitle
 
-- **Fikir Aşamasındaki Girişimciler:** Yol haritası çizmek ve fikrinin taşıdığı riskleri pazar testine çıkmadan önce erken aşamada görerek süreç yönetimini doğru kurgulamak isteyenler. 
-- **Mevcut ve Yönünü Kaybetmiş Şirketler:** Hedeflerinden sapmış, büyüme sancıları çeken veya belirsizlik içinde olup, süreçlerini iyileştirmek için objektif bir dış analitik göze ihtiyaç duyan yapılar(iş modelleri).
-- **Yatırımcılar ve Hızlandırma Programları (Kuluçka Merkezleri):** Hangi girişimin daha sağlam adımlarla ilerlediğini süzmek, melek yatırım ağları için bir ön eleme kriteri oluşturmak ve sertifikalı risk analizi üzerinden yatırım kararı vermek isteyen kurumlar/kişiler.
+**Fikir Aşamasındaki Girişimciler:** Yol haritası çizmek ve fikrinin taşıdığı riskleri pazar testine çıkmadan önce erken aşamada görerek süreç yönetimini doğru kurgulamak isteyenler. 
+
+**Mevcut ve Yönünü Kaybetmiş Şirketler:** Hedeflerinden sapmış, büyüme sancıları çeken veya belirsizlik içinde olup, süreçlerini iyileştirmek için objektif bir dış analitik göze ihtiyaç duyan yapılar(iş modelleri).
+
+**Yatırımcılar ve Hızlandırma Programları (Kuluçka Merkezleri):** Hangi girişimin daha sağlam adımlarla ilerlediğini süzmek, melek yatırım ağları için bir ön eleme kriteri oluşturmak ve sertifikalı risk analizi üzerinden yatırım kararı vermek isteyen kurumlar/kişiler.
 
 ## Product Backlog URL
 
