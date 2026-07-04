@@ -32,7 +32,7 @@ Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıc
 
 ### 🔵 Ürün fikrinin taslağı
 + Kullanıcı girişi
-+ Kullanıcı durumuna bağlı olarak; Fikir aşaması, Start-up ve Yolunu kaybetmiş şeklinde 3 ayrı katman.
++ Kullanıcı durumuna bağlı olarak; Fikir aşaması, Start-up ve Yolunu kaybetmiş şirket şeklinde 3 ayrı katman.
 + Kullanıcı, içerisinde bulunduğu süreci seçtiğinde her bir sürecin kendine özgü test, hatırlatma aşamaları(oyunlaştırılmış bir şekilde olabilir) bulunur.
 + Aşamalar, başından sonuna kadar bir fikrin, girişimin ya da şirketin, teoride başarısızlık ihtimalini çok düşük seviyelerde tutacak bilgiler, hatırlatmalar yani kısacası yol haritalarından oluşacak. Kullanıcılar, gözlerinden kaçırdıkları veya hiç bakmadıkları perspektiflerden, içerisinde bulundukları süreçlerin ne durumda olduğunu kendileri keşfedecekler.
 
