@@ -1,7 +1,5 @@
 # **Takım 123**
 
-Takım 123
-
 # Ürün İle İlgili Bilgiler
 
 ## Takım Elemanları
