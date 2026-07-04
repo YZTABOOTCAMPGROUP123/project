@@ -1,6 +1,6 @@
-# **Takım 123**
+# **Takım 123 - StartMetrics**
 
-# Ürün İle İlgili Bilgiler
+## Ürün İle İlgili Bilgiler
 
 ## Takım Elemanları
 
@@ -49,7 +49,7 @@ Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıc
 
 ## Product Backlog URL
 
---WIP--
+[Github Projects](https://github.com/orgs/YZTABOOTCAMPGROUP123/projects/1)
 
 ---
 
