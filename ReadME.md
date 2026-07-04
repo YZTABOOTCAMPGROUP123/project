@@ -12,7 +12,7 @@
 
 ## Ürün İsmi
 
-NOT DECIDED
+P.A.R.M (Prudence & Awareness Road Map)
 
 ## Ürün Açıklaması
 
