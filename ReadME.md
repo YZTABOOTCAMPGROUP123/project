@@ -28,7 +28,7 @@ Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıc
 
 **Teori Metodolojisi Entegrasyonu:** Arka planda Eric Ries'ın "Lean Startup" ("Yap-Ölç-Öğren") döngüsünü ve Bill Aulet'in "24 Adımda Disiplinli Girişimcilik modelini" (TAM hesaplama, persona çıkarma vb.) kullanan modeller ile yönlendirici adımlar 
 
-**AI Pazar ve Rakip Analiz Botu:** NLP tabanlı yapay zekâ ile küresel ve yerel pazardaki benzer rakipleri ve başarısızlık hikayelerini anında tarayıp raporlama
+**AI Pazar ve Rakip Analiz Botu:** NLP tabanlı yapay zekâ ile küresel ve yerel pazardaki benzer rakipleri ve başarısızlık hikayelerini anında tarayıp raporlama 
 
 **Kademeli (Gated) Veri Toplama:** Platform kullanıcısının isteğine bağlı olarak ve ticari sınırların korunması amacıyla verilerin aşamalı olarak toplanıp ML ve DL modellerinin geliştirilmesi.
 
