@@ -49,7 +49,8 @@ Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıc
 
 # Sprint 1
 
-WIP
+1.1) Ask & Prepare aşaması: Platform için teorik iş modelleri ve girişimcilik dünyasında olmazsa olmaz görülen kalıpların(Cnvas Tablosu haızrlığı gibi) araştırılması
+1.2) Belirlenen teorik iş modellerinin kullanıcıya Dinamik Girişim olgunluk skoru ve Sertifikasyonunun temelinin nasıl oluşturulması gerektiği konusunda karar verilecek.
 
 - **Ürün Durumu**: Ekran görüntüleri:
   Ekran görüntüleri
