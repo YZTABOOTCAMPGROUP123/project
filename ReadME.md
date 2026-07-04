@@ -1,6 +1,6 @@
 # **Takım 123 - StartMetrics**
 
-## Ürün İle İlgili Bilgiler
+# Ürün İle İlgili Bilgiler
 
 ## Takım Elemanları
 
