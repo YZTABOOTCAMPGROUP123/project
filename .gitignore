@@ -1,0 +1,29 @@
+# --- Ortam / sırlar ---
+.env
+backend/.env
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# --- Node / frontend ---
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# --- Editör / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Büyük ham veri (repoya konursa .gitignore'dan çıkarın) ---
+# data/startup_founder_burnout_2026.csv
+
+
+genel_bilgiler/genel_yol_haritasi.png
+genel_bilgiler/proje_bilgileri.txt
+genel_bilgiler/YZTA Bootcamp 2026 (1).pdf
