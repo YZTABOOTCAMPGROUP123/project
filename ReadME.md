@@ -16,7 +16,7 @@ P.A.R.M (Prudence & Awareness Road Map)
 
 ## Ürün Açıklaması
 
-Bu proje; yeni bir iş fikri olan girişimcilerin (startup kurucularının) ve mevcut şirketlerin iş modellerini, daha önce başarılı olmuş, girişimcilik dünyasında başarı için kabul görmüş kalıpları, teorileri ve modelleriyle karşılaştırılması sağlanarak, süreçlerini öngörülebilir kılmak ve başarısızlık risklerini en aza indirgemeyi amaçlar.
+Bu proje; yeni bir iş fikri olan girişimcilerin (startup kurucularının) ve mevcut şirketlerin iş modellerini, daha önce başarılı olmuş, girişimcilik dünyasında kabul görmüş kalıpları, teorileri ve modelleriyle karşılaştırılması sağlanarak, süreçlerini öngörülebilir kılmak ve başarısızlık risklerini en aza indirgemeyi amaçlar.
 
 Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıcılarının iş modellerinin, olgunluk ve güvenilirlik seviyelerini tescilleyecek, yatırımcılara güven verebilecek ve platform için organik bir büyüme aracı işlevi görecek olan "Dinamik Girişim Olgunluk Skoru" tabanlı "Girişim Güvenirlik Sertifikası" mekanizmasıdır. 
 
