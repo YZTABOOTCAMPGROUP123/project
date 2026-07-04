@@ -28,7 +28,7 @@ Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıc
 
 **AI Pazar ve Rakip Analiz Botu:** NLP tabanlı yapay zekâ ile küresel ve yerel pazardaki benzer rakipleri ve başarısızlık hikayelerini anında tarayıp raporlama 
 
-**Kademeli (Gated) Veri Toplama:** Platform kullanıcısının isteğine bağlı olarak ve ticari sınırların korunması amacıyla verilerin aşamalı olarak toplanıp ML ve DL modellerinin geliştirilmesi.
+**Kademeli (Gated) Veri Toplama:** Platform kullanıcısının isteğine bağlı olarak ve ticari sınırların korunması şartı ile verilerin aşamalı olarak toplanıp ML ve DL modellerinin geliştirilmesi. 
 
 ### 🔵 Ürün fikrinin taslağı
 + Kullanıcı girişi
