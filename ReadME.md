@@ -32,6 +32,14 @@ Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıc
 
 **Kademeli (Gated) Veri Toplama:** Platform kullanıcısının isteğine bağlı olarak ve ticari sınırların korunması amacıyla verilerin aşamalı olarak toplanıp ML ve DL modellerinin geliştirilmesi.
 
+### 🔵 Ürün fikrinin taslağı
++ Kullanıcı girişi
++ Kullanıcı durumuna bağlı olarak; Fikir aşaması, Start-up ve Yolunu kaybetmiş şeklinde 3 ayrı katman.
++ Kullanıcı, içerisinde bulunduğu süreci seçtiğinde her bir sürecin kendine özgü test, hatırlatma aşamaları(oyunlaştırılmış bir şekilde olabilir) bulunur.
++ Aşamalar, başından sonuna kadar bir fikrin, girişimin ya da şirketin, teoride başarısızlık ihtimalini çok düşük seviyelerde tutacak bilgiler, hatırlatmalar yani kısacası yol haritalarından oluşacak. Kullanıcılar, gözlerinden kaçırdıkları veya hiç bakmadıkları perspektiflerden, içerisinde bulundukları süreçlerin ne durumda olduğunu kendileri keşfedecekler.
+
+🔔 Önemli: Her fikrin kendine özgü problemi olabilir. Bir çok parametre var. Fakat bizim derdimiz bu problemleri belirleyip çözümler üretmek değil. Varsa, sorunları kullanıcının anlamasını sağlamak ya da en baştan hiç problem yaşanmaması için çabalamaktır. 
+
 
 ## Hedef Kitle
 
@@ -55,7 +63,7 @@ Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıc
 
 1.3) Platform kullanıcıları birer persona olarak mı görülecek yoksa platformdaki iş modelleri için gerekli olan gerçek temel bilgiler mi alınacak. Yani soru şu. Her bir platform kullanıcısının kendi içerisinde bulunduğu durumu kendisi mi keşfetmesini sağlayacağız yoksa biz kullanıcının içerisinde bulunduğu durumları zaten bilip ona göre yönlendirme mi yapılıyor. Bu soruya cevap bularak yol haritası izlemek. 
 
-1.4) Platformun kaba taslak bir şekilde yapısının planlanması ve daha sonra teknik süreçlere geçilmesi.
+1.4) Platformun taslak fikrinin değerlendirilip değişiklik veya düzenleme tavsiyyelerinde bulnulması ve daha sonra teknik süreçlere adım atılması.
 
 
 - **Ürün Durumu**: Ekran görüntüleri:
