@@ -4,11 +4,13 @@
 
 ## Takım Elemanları
 
-1. Elif Berber - Product Owner
-1. Furkan Uysal - Scrum Master
-1. Muhammed Esat Demir - Developer
-1. Utku Uyanık - Developer
-1. Zeynep Tanrıvermiş - Developer
+|  | İsim | Rol |
+|:--------:|:-----|:----|
+| <img src="https://avatars.githubusercontent.com/elifebhub?s=100" width="50"/> | **[Elif Berber](https://github.com/elifebhub)** | Product Owner |
+| <img src="https://avatars.githubusercontent.com/furkansourceyzta?s=100" width="50"/> | **[Furkan Uysal](https://github.com/furkansourceyzta)** | Scrum Master |
+| <img src="https://avatars.githubusercontent.com/muhammedesatdemir?s=100" width="50"/> | **[Muhammed Esat Demir](https://github.com/muhammedesatdemir)** | Developer |
+| <img src="https://avatars.githubusercontent.com/Utku-U?s=100" width="50"/> | **[Utku Uyanık](https://github.com/Utku-U)** | Developer |
+| <img src="https://avatars.githubusercontent.com/zeyneptanrivermis?s=100" width="50"/> | **[Zeynep Tanrıvermiş](https://github.com/zeyneptanrivermis)** | Developer |
 
 ## Ürün İsmi
 
