@@ -12,7 +12,7 @@
 
 ## Ürün İsmi
 
-P.A.R.M (Prudence & Awareness Road Map)
+StartMetrics
 
 ## Ürün Açıklaması
 
