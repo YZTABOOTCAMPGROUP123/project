@@ -1,7 +1,6 @@
-# **Takım İsmi**
-Takım 123 - StartMetrics
+# **Takım 123 - StartMetrics**
 
-# Ürün İle İlgili Bilgiler
+## Ürün İle İlgili Bilgiler
 
 ## Takım Elemanları
 
@@ -56,7 +55,8 @@ Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıc
 
 ---
 
-# Sprint 1
+<details>
+  <summary><h2>Sprint 1</h2></summary>
 
 1.1) Ask & Prepare aşaması: Platform için teorik iş modelleri ve girişimcilik dünyasında olmazsa olmaz görülen kalıpların(Cnvas Tablosu haızrlığı gibi) araştırılması ve platform için de yer alacaklar olanlara karar verilmesi.
 
@@ -75,14 +75,20 @@ WIP ALINAN KARARLAR
 
 - **Sprint Retrospective:**
 
-
----
-
-# Sprint 2
+</details>
 
 
----
+<details>
+  <summary><h2>Sprint 2</h2></summary>
 
-# Sprint 3
+
+
+</details>
+
+
+<details>
+  <summary><h2>Sprint 3</h2></summary>
+
+</details>
 
 ---
