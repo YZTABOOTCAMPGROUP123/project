@@ -69,8 +69,15 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
 1.4) Platformun taslak fikrinin değerlendirilip değişiklik veya düzenleme tavsiyyelerinde bulnulması ve daha sonra teknik süreçlere adım atılması.
 
 
-- **Ürün Durumu**: Ekran görüntüleri:
-  Ekran görüntüleri
+- **Ürün Durumu**
+
+  <img width="1600" height="798" alt="WhatsApp Image 2026-07-05 at 16 15 07" src="https://github.com/user-attachments/assets/dcc7200c-b8bf-42fe-b4a3-ce44b745ddd0" />
+  <img width="1600" height="797" alt="WhatsApp Image 2026-07-05 at 16 15 07 (1)" src="https://github.com/user-attachments/assets/ed238d18-b2b2-48ea-a81e-1a08e98b5c8d" />
+  <img width="1600" height="788" alt="WhatsApp Image 2026-07-05 at 16 15 08" src="https://github.com/user-attachments/assets/d9dbd582-4f06-4394-b524-5bd835b43ccd" />
+  <img width="1600" height="760" alt="WhatsApp Image 2026-07-05 at 16 15 08 (1)" src="https://github.com/user-attachments/assets/4db0448a-fbe5-4407-89d4-2fb76cb181ef" />
+  <img width="1600" height="797" alt="WhatsApp Image 2026-07-05 at 16 15 08 (2)" src="https://github.com/user-attachments/assets/66f79dc2-7bb7-446b-ba2c-62ee73bfd0b1" />
+
+
 
 - **Sprint Review**: 
 WIP ALINAN KARARLAR
