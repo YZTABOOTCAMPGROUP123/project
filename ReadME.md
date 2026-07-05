@@ -66,6 +66,10 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
 
    Sprint 1 Hedefi: 100 Puan
 
+- **Sprint Board Durumu**
+
+<img width="1704" height="1992" alt="startmetrics_board" src="https://github.com/user-attachments/assets/27b8743c-b0e2-4350-87de-17152b4a73a4" />
+
 - **Ürün Durumu**
 
   <img width="1600" height="798" alt="WhatsApp Image 2026-07-05 at 16 15 07" src="https://github.com/user-attachments/assets/dcc7200c-b8bf-42fe-b4a3-ce44b745ddd0" />
@@ -85,8 +89,18 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
   * Dökümantasyonun Bootcampscrumptemplate üzerinden geliştirilmesi
   * Vercel'de deploy edilen proje için URL'nin repoya eklenmesi
 
-- **Sprint Retrospective:**
+  **Sprint Review Katılımcıları:**
+    - Elif Berber 
+    - Furkan Uysal
+    - Muhammed Esat Demir 
+    - Utku Uyanık
+    - Zeynep Tanrıvermiş
 
+- **Sprint Retrospective:**
+  - Sprintlerde kullanılacak taskler için story oluşturulması
+  - Sprintlerde kullanılacak storyler için genel puanlandırma mantığının netleştirilmesi
+  - Ekip içinde görev dağılımının daha sağlıklı yapılması
+  - Github Projects'in projenin ilerleyen noktalarında yeterli kalmaması durumunda değiştirilmesi
 </details>
 
 
