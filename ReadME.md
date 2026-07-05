@@ -50,9 +50,10 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
 
 **Mevcut ve Yönünü Kaybetmiş Şirketler:** Hedeflerinden sapmış, büyüme sancıları çeken veya belirsizlik içinde olup, süreçlerini iyileştirmek için objektif bir dış analitik göze ihtiyaç duyanlar.
 
-## Product Backlog URL
+## Ek Bağlantılar
 
-[Github Projects](https://github.com/orgs/YZTABOOTCAMPGROUP123/projects/1)
+* [Product Backlog](https://github.com/orgs/YZTABOOTCAMPGROUP123/projects/1)
+* [Daily Scrum](https://docs.google.com/document/d/1CXmrlbTHJGSX7W13S3iU7xI51uVJJJwOAw0mJyVzU50/edit?usp=sharing)
 
 ---
 
