@@ -60,14 +60,11 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
 <details>
   <summary><h2>Sprint 1</h2></summary>
 
-1.1) Ask & Prepare aşaması: Platform için teorik iş modelleri ve girişimcilik dünyasında olmazsa olmaz görülen kalıpların(Cnvas Tablosu haızrlığı gibi) araştırılması ve platform için de yer alacaklar olanlara karar verilmesi.
+- **Sprint Puanları**
 
-1.2) Belirlenen teorik iş modellerinin kullanıcıya Dinamik Girişim olgunluk skoru ve Sertifikasyonunun temelinin nasıl oluşturulması gerektiği konusunda karar verilecek.
+   Toplam Backlog Puanı: 274 Puan
 
-1.3) Platform kullanıcıları birer persona olarak mı görülecek yoksa platformdaki iş modelleri için gerekli olan gerçek temel bilgiler mi alınacak. Yani soru şu. Her bir platform kullanıcısının kendi içerisinde bulunduğu durumu kendisi mi keşfetmesini sağlayacağız yoksa biz kullanıcının içerisinde bulunduğu durumları zaten bilip ona göre yönlendirme mi yapılıyor. Bu soruya cevap bularak yol haritası izlemek. 
-
-1.4) Platformun taslak fikrinin değerlendirilip değişiklik veya düzenleme tavsiyyelerinde bulnulması ve daha sonra teknik süreçlere adım atılması.
-
+   Sprint 1 Hedefi: 100 Puan
 
 - **Ürün Durumu**
 
@@ -80,7 +77,13 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
 
 
 - **Sprint Review**: 
-WIP ALINAN KARARLAR
+  * Hosting için Vercel kullanılması
+  * Backlog için Github Projects kullanımı
+  * OpenAI API'sini kullanarak GPT-4o modeli kullanımı
+  * Frontend için Vite react-tsx kullanımı
+  * Backend için Python + FastAPI kullanımı
+  * Dökümantasyonun Bootcampscrumptemplate üzerinden geliştirilmesi
+  * Vercel'de deploy edilen proje için URL'nin repoya eklenmesi
 
 - **Sprint Retrospective:**
 
