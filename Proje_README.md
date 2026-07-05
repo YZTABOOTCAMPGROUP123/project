@@ -37,10 +37,10 @@ ve risk düşükse **PDF Sertifika** indir. Süreç burada biter.
 - **`scorer.py` (bizim modelimiz):** Kural tabanlı, **tam deterministik** skorlayıcı.
   Aynı girdi → aynı skor. "Güvenilir/tutarlı Olgunluk Skoru"nun teknik temeli.
   Ağırlıklar veri setinin ilk 10 satırından ve doğrulanmış korelasyonlardan
-  türetildi (tam CSV **eğitilmedi**).
+  türetildi (tam CSV **eğitilmedi**). 3 maddelik nokta atışı bir Türkçe Mentor öneri Raporu.
 - **`orchestrator.py` (ekstra puan katmanı):** Girdiyi temizler, skorlar, LLM
   prompt'unu kurar, raporu birleştirir.
-- **`llm_client.py`:** OpenAI ile 3 maddelik Türkçe mentor raporu. **Anahtar
+- **`llm_client.py`:** OpenAI ile kullanıcının iş modeli raporu. **Anahtar
   yoksa** kural tabanlı stub rapora düşer → demo asla çökmez.
 
 **Hibrit dağılım (hedef vizyon):** ~%60 LLM / %40 kendi modelimiz. Sprint 1'de
