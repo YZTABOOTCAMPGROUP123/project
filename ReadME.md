@@ -21,8 +21,7 @@ StartMetrics
 Bu proje; yeni bir iş fikri olan girişimcilerin, start-up kurucularının ve mevcut şirketlerin, iş modellerinin durumlarını, kullanıcı profilleri ve daha önce başarılı olmuş olan, girişimcilik dünyasında kabul görmüş teorik yol haritaları kalıpları ile kullanıcı iş modellerinin analizleri sağlnanan akıllı bir platformdur. Bu platformun amacı, kullanıcıların süreçlerini öngörülebilir kılmak ve başarısızlık risklerini en aza indirgemektir. 
 
 ### 💡 En Büyük Fark Yaratan Özelliği:
-Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin olgunluk ve güvenilirlik seviyelerini tescilleyen "Dinamik Girişim Olgunluk Skoru" tabanlı "Girişim Güvenirlik Sertifikası" mekanizmasıdır. Bu sertifika platform için organik bir büyüme (viral yayılım) aracı işlevi görür. 
-
+Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin olgunluk ve güvenilirlik seviyelerini tescilleyen "Dinamik Girişim Olgunluk Skoru" tabanlı "Girişim Güvenirlik Sertifikası" mekanizmasıdır. Bu sertifika platform için organik bir büyüme (viral yayılım) aracı işlevi görür. Girişimcilerin sağlık ve batma riskini, onlarca sayfalık iş planlarıyla boğmadan tek sayfalık dinamik bir raporla ölçen ve yön veren bir analiz motorudur.
 
 ## Ürün Özellikleri
 
