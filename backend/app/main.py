@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # .env -> ortam değişkenleri (OPENAI_API_KEY vb.)
 
-from fastapi import FastAPI, HTTPException  # noqa: E402
+from fastapi import APIRouter, FastAPI, HTTPException  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import Response  # noqa: E402
 
@@ -33,21 +33,24 @@ app = FastAPI(title="StartMetrics API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    # Prod'da (Vercel) frontend ve backend aynı domain -> CORS gerekmez ama
+    # geliştirmede localhost, sunumda "*" ile serbest bırakıyoruz (PoC).
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Tüm uç noktalar /api altında toplanır. Böylece hem lokal (Vite proxy /api'yi
+# olduğu gibi iletir) hem Vercel (/api/* -> Python function) aynı yolu kullanır.
+api = APIRouter(prefix="/api")
 
-@app.get("/health")
+
+@api.get("/health")
 def health():
     return {"ok": True}
 
 
-@app.get("/config")
+@api.get("/config")
 def config():
     """Frontend'in dinamik formu çizmesi için dal konfigürasyonu."""
     return {
@@ -60,7 +63,7 @@ def config():
     }
 
 
-@app.post("/analyze", response_model=AnalysisResponse)
+@api.post("/analyze", response_model=AnalysisResponse)
 def analyze(req: AnalyzeRequest):
     try:
         return orchestrator.analyze(req.branch, req.answers)
@@ -68,7 +71,7 @@ def analyze(req: AnalyzeRequest):
         raise HTTPException(status_code=400, detail=str(exc))
 
 
-@app.post("/certificate")
+@api.post("/certificate")
 def certificate(req: AnalyzeRequest):
     """Analizi tekrar çalıştırıp uygunsa PDF döndürür (durumsuz)."""
     try:
@@ -89,3 +92,6 @@ def certificate(req: AnalyzeRequest):
         media_type="application/pdf",
         headers={"Content-Disposition": "attachment; filename=startmetrics_sertifika.pdf"},
     )
+
+
+app.include_router(api)
