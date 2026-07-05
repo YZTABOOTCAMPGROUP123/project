@@ -18,36 +18,38 @@ StartMetrics
 
 ## Ürün Açıklaması
 
-Bu proje; yeni bir iş fikri olan girişimcilerin (startup kurucularının) ve mevcut şirketlerin iş modellerini, daha önce başarılı olmuş, girişimcilik dünyasında kabul görmüş kalıpları, teorileri ve modelleriyle karşılaştırılması sağlanarak, süreçlerini öngörülebilir kılmak ve başarısızlık risklerini en aza indirgemeyi amaçlar.
+Bu proje; yeni bir iş fikri olan girişimcilerin, start-up kurucularının ve mevcut şirketlerin, iş modellerinin durumlarını, kullanıcı profilleri ve daha önce başarılı olmuş olan, girişimcilik dünyasında kabul görmüş teorik yol haritaları kalıpları ile kullanıcı iş modellerinin analizleri sağlnanan akıllı bir platformdur. Bu platformun amacı, kullanıcıların süreçlerini öngörülebilir kılmak ve başarısızlık risklerini en aza indirgemektir. 
 
-Bu doğrultuda platformun en büyük ayırt edici özelliği, platform kullanıcılarının iş modellerinin, olgunluk ve güvenilirlik seviyelerini tescilleyecek, yatırımcılara güven verebilecek ve platform için organik bir büyüme aracı işlevi görecek olan "Dinamik Girişim Olgunluk Skoru" tabanlı "Girişim Güvenirlik Sertifikası" mekanizmasıdır. 
+💡 En Büyük Fark Yaratan Özelliği:
+Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin olgunluk ve güvenilirlik seviyelerini tescilleyen "Dinamik Girişim Olgunluk Skoru" tabanlı "Girişim Güvenirlik Sertifikası" mekanizmasıdır. Bu sertifika platform için organik bir büyüme (viral yayılım) aracı işlevi görür. 
+
 
 ## Ürün Özellikleri
 
 **Dinamik Girişim Olgunluk Skoru ve Sertifikasyon:** Sertifikasyon süreci için teorik iş modelleri aşamalarını başarıyla tamamlayan girişimlerin olgunluk skorları. 
 
-**Teori Metodolojisi Entegrasyonu:** Arka planda Eric Ries'ın "Lean Startup" ("Yap-Ölç-Öğren") döngüsünü ve Bill Aulet'in "24 Adımda Disiplinli Girişimcilik modelini" (TAM hesaplama, persona çıkarma vb.) kullanan modeller ile yönlendirici adımlar 
+**Teori Metodolojisi Entegrasyonu:** Arka planda Eric Ries'ın "Lean Startup" (Yap-Ölç-Öğren) döngüsünü ve Bill Aulet'in "24 Adımda Disiplinli Girişimcilik" modelini (TAM hesaplama, persona çıkarma vb.) referans alarak kullanıcıyı yönlendirir. 
 
-**AI Pazar ve Rakip Analiz Botu:** NLP tabanlı yapay zekâ ile küresel ve yerel pazardaki benzer rakipleri ve başarısızlık hikayelerini anında tarayıp raporlama 
+**Kademeli (Gated) Veri Toplama & ML Hazırlığı:** Arka plandaki scorer.py katmanı sayesinde, kullanıcının girdiği veriler matematiksel ve kural tabanlı deterministik (kesin sonuçlu) ML modelleriyle skorlanır ve 3 maddelik nokta atışı bir Türkçe Mentor öneri Raporu üretilir.
 
-**Kademeli (Gated) Veri Toplama:** Platform kullanıcısının isteğine bağlı olarak ve ticari sınırların korunması şartı ile verilerin aşamalı olarak toplanıp ML ve DL modellerinin geliştirilmesi. 
+**AI Pazar ve Rakip Analiz Botu:** llm_client.py katmanı sayesinde kullanıcının verileri OpenAI API (veya LLM_PROVIDER ile değiştirilebilir herhangi bir alternatif LLM) aracılığıyla işlenerek kapsamlı bir rapor üretilir. %60 LLM / %40 kendi modelimiz ile hem kullanıcının durum bilgileri hem de iş modeli bilgileri ile hibrit bir rapor oluşturulur. 
 
-### 🔵 Ürün fikrinin taslağı
-+ Kullanıcı girişi
-+ Kullanıcı durumuna bağlı olarak; Fikir aşaması, Start-up ve Yolunu kaybetmiş şirket şeklinde 3 ayrı katman.
-+ Kullanıcı, içerisinde bulunduğu süreci seçtiğinde her bir sürecin kendine özgü test, hatırlatma aşamaları(oyunlaştırılmış bir şekilde olabilir) bulunur.
-+ Aşamalar, başından sonuna kadar bir fikrin, girişimin ya da şirketin, teoride başarısızlık ihtimalini çok düşük seviyelerde tutacak bilgiler, hatırlatmalar yani kısacası yol haritalarından oluşacak. Kullanıcılar, gözlerinden kaçırdıkları veya hiç bakmadıkları perspektiflerden, içerisinde bulundukları süreçlerin ne durumda olduğunu kendileri keşfedecekler.
 
-🔔 Önemli: Her fikrin kendine özgü problemi olabilir. Bir çok parametre var. Fakat bizim derdimiz bu problemleri belirleyip çözümler üretmek değil. Varsa, sorunları kullanıcının anlamasını sağlamak ya da en baştan hiç problem yaşanmaması için çabalamaktır. 
+### 🔵 Kullanıcı Deneyimi ve Platform Akışı
++ 3 ayrı katmanlı kullanıcı durumu(Fikrim var, Start-Up'ım var, Mevcut şirketim var) seçimi yapılır.
++ Kullanıcı, durumunu seçtiğinde, bilgilerini giridiği bir form bulunur. 
++ Form yanıtları sonrasında, kullanıcı sürecine dair özet bilgiler ve öneriler yer alır.
++ Bu bilgiler ışığında, dashboard aşamalarına geçilir. Başından sonuna kadar bir iş modelinin teoride başarısızlık ihtimalini çok düşük seviyelerde tutacak şekilde temellendirilmiş olan, hatırlatmalar ve yol haritaları ile kullanıcıdan bilgiler toplanır. 
++ Son aşama olarak da kullanıcıların vermiş olduğu bilgiler doğrultusunda bir skorlama ve rapor oluşturulur. Eğer kullanıcının skoru %75 üzerinde ise platform sertifikası almaya hak kazanır. 
+
+🔔 Önemli: Her fikrin kendine özgü problemi olabilir. Bir çok parametre var. Fakat bizim amacımız bu problemleri belirleyip çözümler üretmek değil. Varsa, sorunları kullanıcının anlamasını sağlamak ya da en baştan itibaren hiç problem yaşanmaması için çabalamaktır. 
 
 
 ## Hedef Kitle
 
-**Fikir Aşamasındaki Girişimciler:** Yol haritası çizmek ve fikrinin taşıdığı riskleri pazar testine çıkmadan önce erken aşamada görerek süreç yönetimini doğru kurgulamak isteyenler. 
+**Fikir Aşamasındaki Girişimciler ve Start-Up kurucuları:** Öngörüler içeren bir yol haritası çizmek ve fikrin taşıdığı riskleri, pazar testine çıkmadan önce erken aşamada görerek süreç yönetimini doğru kurgulamak isteyenler. 
 
-**Mevcut ve Yönünü Kaybetmiş Şirketler:** Hedeflerinden sapmış, büyüme sancıları çeken veya belirsizlik içinde olup, süreçlerini iyileştirmek için objektif bir dış analitik göze ihtiyaç duyan yapılar(iş modelleri).
-
-**Yatırımcılar ve Hızlandırma Programları (Kuluçka Merkezleri):** Hangi girişimin daha sağlam adımlarla ilerlediğini süzmek, melek yatırım ağları için bir ön eleme kriteri oluşturmak ve sertifikalı risk analizi üzerinden yatırım kararı vermek isteyen kurumlar/kişiler.
+**Mevcut ve Yönünü Kaybetmiş Şirketler:** Hedeflerinden sapmış, büyüme sancıları çeken veya belirsizlik içinde olup, süreçlerini iyileştirmek için objektif bir dış analitik göze ihtiyaç duyanlar.
 
 ## Product Backlog URL
 
