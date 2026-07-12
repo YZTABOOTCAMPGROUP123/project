@@ -1,0 +1,4 @@
+# Vercel'in asla okumaması ve derlememesi gereken ağır dosyalar
+data/
+model_egitimi/
+backend/train.py
