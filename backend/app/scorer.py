@@ -9,7 +9,6 @@ from __future__ import annotations
 import os
 import sys
 from dataclasses import dataclass, field
-import joblib
 
 # Dal başına olgunluk taban ofseti
 BRANCH_OFFSET = {
@@ -43,18 +42,16 @@ def _num(value, default: float) -> float:
 
 
 # =================================================================
-# ⚙️ MODEL ENTEGRASYON KATMANI (DİNAMİK PATH & DEBUG KATMANI)
+# ⚙️ MODEL ENTEGRASYON KATMANI (TAMAMEN SAF PYTHON - SIFIR PKL/JOBLIB)
 # =================================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ENCODER_PATH = os.path.join(BASE_DIR, "encoders.pkl")
 
-# Vercel'in sys.path dizinine geçerli klasörü açıkça enjekte ediyoruz
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
 
 INIT_ERROR = None
 try:
-    # Tüm alternatif import kombinasyonlarını deniyoruz
+    # m2cgen modelini içeri aktaruyoruz
     try:
         import model_logic as ml_logic
     except ImportError:
@@ -63,7 +60,15 @@ try:
         except ImportError:
             import backend.app.model_logic as ml_logic
 
-    label_encoders = joblib.load(ENCODER_PATH)
+    # PKL uyuşmazlığını aşmak için haritalama doğrudan kodun içine gömüldü
+    LABEL_ENCODERS_MAP = {
+        'Founder_Type': {'Solo': 0, 'Co-founder': 1},
+        'Economic_Climate': {'Recession': 0, 'Stable': 1, 'Boom': 2},
+        'Industry': {'E-commerce': 0, 'SaaS': 1, 'Fintech': 2, 'Healthtech': 3, 'Edtech': 4, 'AI': 5},
+        'Funding_Stage': {'Pre-Seed': 0, 'Seed': 1, 'Bootstrapped': 2, 'Series A': 3},
+        'Work_Mode': {'Remote': 0, 'Hybrid': 1, 'In-office': 2},
+        'Seeks_Mental_Health_Support': {'No': 0, 'Yes': 1}
+    }
     
     MODEL_FEATURES = [
         'Founder_Type', 'Economic_Climate', 'Founder_Age', 'Founder_Experience_Years', 
@@ -82,27 +87,23 @@ except Exception as e:
 
 def score(features: dict) -> ScoreResult:
     """Askable feature'lardan Olgunluk Skoru ve Risk olasılığı üretir."""
+    global INIT_ERROR
     
     # -----------------------------------------------------------------
     # [DURUM A] GEÇERLİ BİR ML MODELİ VARSA (Sprint 2 Akışı)
     # -----------------------------------------------------------------
-    if USE_ML:
+    if USE_ML and not INIT_ERROR:
         try:
             input_row = []
             for col in MODEL_FEATURES:
                 raw_val = features.get(col, None)
                 
-                if col in label_encoders:
-                    le = label_encoders[col]
-                    val_str = str(raw_val) if raw_val is not None else "Seed"
-                    if val_str in le.classes_:
-                        input_row.append(le.transform([val_str])[0])
-                    else:
-                        input_row.append(0)
+                if col in LABEL_ENCODERS_MAP:
+                    val_str = str(raw_val) if raw_val is not None else ""
+                    input_row.append(LABEL_ENCODERS_MAP[col].get(val_str, 0))
                 else:
                     input_row.append(_num(raw_val, 0.0))
 
-            # m2cgen çıktısı lokal testte iki elemanlı liste döndü: [Class_0, Class_1]
             res = ml_logic.score(input_row)
             if isinstance(res, (list, tuple)):
                 risk_probability = float(res[1])  # Sınıf 1: Batma Olasılığı
@@ -129,7 +130,6 @@ def score(features: dict) -> ScoreResult:
                 ],
             )
         except Exception as runtime_error:
-            # Çalışma anında bir hata olursa bunu yakalayıp aşağıda göstereceğiz
             INIT_ERROR = f"Runtime Hatası: {runtime_error}"
 
     # -----------------------------------------------------------------
@@ -214,9 +214,9 @@ def score(features: dict) -> ScoreResult:
     else:
         risk_band = "Yüksek"
 
-    # Eğer arka planda bir import veya runtime hatası yakaladıysak ekranda göster
+    # Eğer arka planda bir hata yakaladıysak ekranda göster
     if INIT_ERROR:
-        drivers.append(f"🚨 ML Sinyal Hatası: {INIT_ERROR}")
+        drivers.append(f"🚨 Standart Analiz Motoru Etkin: {INIT_ERROR}")
     elif not drivers:
         drivers.append("Girdiler dengeli — belirgin bir kritik sinyal yok")
 
