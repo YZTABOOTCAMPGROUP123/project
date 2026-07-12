@@ -1,9 +1,12 @@
 # Vercel Python runtime bu dosyadan bağımlılıkları kurar (kök dizinde olmalı).
-# backend/requirements.txt ile aynı içerik; Vercel kökte arar.
 fastapi>=0.110
 pydantic>=2.6
 python-dotenv>=1.0
 fpdf2>=2.7
 openai>=1.30
-# NOT: uvicorn Vercel'de gerekmez (Vercel ASGI'yi kendi çalıştırır) ama
-# lokal geliştirme backend/requirements.txt üzerinden kurulur.
+
+# Sprint 2 - Makine Öğrenmesi ve Model Bağımlılıkları (Vercel için Şart)
+joblib==1.5.3
+scikit-learn==1.7.2
+pandas==2.3.3
+numpy==2.2.6
