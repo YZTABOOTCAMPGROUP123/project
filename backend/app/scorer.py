@@ -131,6 +131,7 @@ def score(features: dict) -> ScoreResult:
             )
         except Exception as e:
             # ML operasyonunda anlık bir hata oluşursa sistem can yeleğini giyer ve aşağı kayar
+            print(f"ML ERROR: {e}")
             pass
 
     # -----------------------------------------------------------------
