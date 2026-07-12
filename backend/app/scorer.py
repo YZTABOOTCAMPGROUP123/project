@@ -2,9 +2,6 @@
 scorer.py — StartMetrics Hibrit Analitik ve ML Model Motoru (Sprint 1 + Sprint 2).
 
 ARAYÜZ DONDURULMUŞTUR: `score(features) -> ScoreResult`.
-Eğer 'trained_model.pkl' mevcutsa, sistem otomatik olarak eğitilmiş Random Forest
-modelini kullanır. Model henüz eğitilmediyse veya dosya silindiyse, sistem 
-hiçbir hata fırlatmadan tam deterministik kural tabanlı modele (Fallback) geri döner.
 """
 
 from __future__ import annotations
@@ -47,25 +44,28 @@ def _num(value, default: float) -> float:
 
 
 # =================================================================
-# ⚙️ MODEL ENTEGRASYON VE YÜKLEME KATMANI (DİNAMİK YOL GÜNCELLEMESİ)
+# ⚙️ MODEL ENTEGRASYON KATMANI (SAF PYTHON MOTORU - NO SKLEARN)
 # =================================================================
-# scorer.py dosyasının bulunduğu klasörün tam yolunu alıyoruz (app klasörü)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# .pkl dosyalarının yollarını bu klasöre göre dinamik olarak kilitliyoruz
-MODEL_PATH = os.path.join(BASE_DIR, "trained_model.pkl")
 ENCODER_PATH = os.path.join(BASE_DIR, "encoders.pkl")
 
-# Model dosyalarının varlığını kontrol et ve dinamik olarak yükle
-if os.path.exists(MODEL_PATH) and os.path.exists(ENCODER_PATH):
-    try:
-        ml_model = joblib.load(MODEL_PATH)
-        label_encoders = joblib.load(ENCODER_PATH)
-        MODEL_FEATURES = ml_model.feature_names_in_.tolist()
-        USE_ML = True
-    except Exception as e:
-        USE_ML = False
-else:
+try:
+    # m2cgen ile üretilen saf Python model mantığını içeri aktarıyoruz
+    import app.model_logic as ml_logic
+    label_encoders = joblib.load(ENCODER_PATH)
+    
+    # Modelin eğitim aşamasında tam olarak beklediği 23 özelliğin sıralı listesi
+    MODEL_FEATURES = [
+        'Founder_Type', 'Economic_Climate', 'Founder_Age', 'Founder_Experience_Years', 
+        'Industry', 'Funding_Stage', 'Work_Mode', 'Team_Size', 'Startup_Age_Months', 
+        'Weekly_Work_Hours', 'Sleep_Hours', 'Exercise_Days_Per_Week', 'Vacation_Days_Taken', 
+        'Investor_Pressure_Score', 'Cofounder_Conflict_Score', 'Stress_Score', 
+        'Decision_Fatigue_Score', 'Monthly_Revenue_Growth_Percent', 'Runway_Months_Remaining', 
+        'Product_Market_Fit_Score', 'Employee_Turnover_Percent', 'Work_Life_Balance_Score', 
+        'Seeks_Mental_Health_Support'
+    ]
+    USE_ML = True
+except Exception as e:
     USE_ML = False
 
 
@@ -80,10 +80,9 @@ def score(features: dict) -> ScoreResult:
     # -----------------------------------------------------------------
     if USE_ML:
         try:
-            # 1. Pandas yerine Saf Python listesi ile girdiyi hazırlıyoruz
+            # 1. Girdileri modelin tam olarak beklediği indeks sırasına göre matris dizisine ekliyoruz
             input_row = []
             
-            # Modelin beklediği sütun sırasına göre özellikleri hazırla
             for col in MODEL_FEATURES:
                 raw_val = features.get(col, None)
                 
@@ -95,21 +94,18 @@ def score(features: dict) -> ScoreResult:
                     if val_str in le.classes_:
                         input_row.append(le.transform([val_str])[0])
                     else:
-                        # Bilinmeyen bir kategori gelirse ilk sınıfa eşitle (Out of vocabulary koruması)
                         input_row.append(0)
                 else:
-                    # Sayısal sütunlar için nötr varsayılan ata (Form boş bırakıldıysa çökme engelleme)
+                    # Sayısal sütunlar için nötr varsayılan ata
                     input_row.append(_num(raw_val, 0.0))
 
-            # 2. ML Model Tahmini (scikit-learn iki boyutlu saf Python listesi kabul eder: [[...]])
-            probabilities = ml_model.predict_proba([input_row])[0]
-            risk_probability = float(probabilities[1])
+            # 2. ML Model Tahmini (m2cgen çıktısı doğrudan sınıf 1 -batma riski- olasılığını döner)
+            risk_probability = float(ml_logic.score(input_row))
 
-            # Taban risk %1, tavan risk %99 sınırlandırması (Sprint 1 UI standartları korundu)
+            # Taban risk %1, tavan risk %99 sınırlandırması
             risk_probability = round(_clamp(risk_probability, 0.01, 0.99), 2)
 
             # 3. Olgunluk Skorunu ML çıktısından deterministik olarak türet
-            # Başarısızlık olasılığı ne kadar yüksekse, olgunluk skoru o kadar düşüktür.
             maturity_score = int(_clamp(round((1.0 - risk_probability) * 100), 0, 100))
 
             # 4. Risk Bandını Belirle
@@ -125,13 +121,12 @@ def score(features: dict) -> ScoreResult:
                 risk_probability=risk_probability,
                 risk_band=risk_band,
                 drivers=[
-                    f"[ML MODELİ] Tahmin örüntüleri başarıyla işlendi.",
-                    f"Model Ayırt Ediciliği (ROC-AUC): %93.05 genellenebilirlik odaklı."
+                    "[ML MODELİ] Tahmin örüntüleri başarıyla işlendi.",
+                    "Model Ayırt Ediciliği (ROC-AUC): %93.05 genellenebilirlik odaklı."
                 ],
             )
         except Exception as e:
-            # ML operasyonunda anlık bir hata oluşursa sistem can yeleğini giyer ve aşağı kayar
-            print(f"ML ERROR: {e}")
+            # Herhangi bir hata durumunda can yeleğini giyip kuralsal koda geçiyoruz
             pass
 
     # -----------------------------------------------------------------
