@@ -26,7 +26,7 @@ export default function NavigationReport({ result, branch, answers }: Props) {
   return (
     <div className="card panel">
       <h3 className="panel-title">Navigasyon Raporu</h3>
-      <p className="panel-cap">Yapay Zekâ Mentor · Waze Modu</p>
+      <p className="panel-cap">Yapay Zekâ Mentor · Dinamik Yol Haritası</p>
 
       <ol className="nav-items">
         {result.navigation_report.map((item, i) => (

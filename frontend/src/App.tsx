@@ -105,12 +105,13 @@ export default function App() {
 
           <motion.p
             className="hero-lead"
+            style={{ maxWidth: '700px' }}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.12 }}
           >
             Olgunluk skorunu ölç, batma riskini gör, önündeki 3 kritik virajı
-            bir Waze gibi öğren. Nerede olduğunu seç — sana yol gösterelim.
+            yapay zeka analizimizle erkenden öğren. Nerede olduğunu seç — sana yol gösterelim.
           </motion.p>
 
           {error && <div className="error-banner">{error}</div>}

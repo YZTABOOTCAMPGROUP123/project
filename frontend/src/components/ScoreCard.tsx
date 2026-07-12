@@ -46,7 +46,12 @@ export default function ScoreCard({ result }: { result: AnalysisResponse }) {
   return (
     <div className="card panel">
       <h3 className="panel-title">Olgunluk Skoru</h3>
-      <p className="panel-cap">Analitik Model · Deterministik</p>
+      {/* Eski statik p etiketinin yerine bu dinamik yapıyı ekliyoruz */}
+      <p className="panel-cap">
+        {drivers.some(d => d.includes("[ML MODELİ]")) 
+          ? "Akıllı Tahmin Motoru • Aktif" 
+          : "Standart Analiz Motoru • Güvenli Mod"}
+      </p>
 
       <div className="gauge-wrap">
         <div className="gauge">

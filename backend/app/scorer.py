@@ -7,10 +7,11 @@ ARAYÜZ DONDURULMUŞTUR: `score(features) -> ScoreResult`.
 from __future__ import annotations
 
 import os
+import sys
 from dataclasses import dataclass, field
 import joblib
 
-# Dal başına olgunluk taban ofseti (Kuralsal model fallback için korundu)
+# Dal başına olgunluk taban ofseti
 BRANCH_OFFSET = {
     "Pre-Seed": 6,
     "Seed": 2,
@@ -22,7 +23,6 @@ BRANCH_OFFSET = {
 @dataclass
 class ScoreResult:
     """Skorlayıcının çıktısı. UI ve LLM zemini bu nesneyi tüketir."""
-
     maturity_score: int          # 0-100 Olgunluk/Sağlık Skoru
     risk_probability: float      # 0-1 Kapanma/Batma olasılığı
     risk_band: str               # "Düşük" | "Orta" | "Yüksek"
@@ -34,7 +34,6 @@ def _clamp(value: float, low: float, high: float) -> float:
 
 
 def _num(value, default: float) -> float:
-    """Girdiyi float'a çevir; boş/None/hatalıysa nötr varsayılana düş."""
     if value is None or value == "":
         return float(default)
     try:
@@ -44,17 +43,28 @@ def _num(value, default: float) -> float:
 
 
 # =================================================================
-# ⚙️ MODEL ENTEGRASYON KATMANI (SAF PYTHON MOTORU - NO SKLEARN)
+# ⚙️ MODEL ENTEGRASYON KATMANI (DİNAMİK PATH & DEBUG KATMANI)
 # =================================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ENCODER_PATH = os.path.join(BASE_DIR, "encoders.pkl")
 
+# Vercel'in sys.path dizinine geçerli klasörü açıkça enjekte ediyoruz
+if BASE_DIR not in sys.path:
+    sys.path.append(BASE_DIR)
+
+INIT_ERROR = None
 try:
-    # m2cgen ile üretilen saf Python model mantığını içeri aktarıyoruz
-    import app.model_logic as ml_logic
+    # Tüm alternatif import kombinasyonlarını deniyoruz
+    try:
+        import model_logic as ml_logic
+    except ImportError:
+        try:
+            import app.model_logic as ml_logic
+        except ImportError:
+            import backend.app.model_logic as ml_logic
+
     label_encoders = joblib.load(ENCODER_PATH)
     
-    # Modelin eğitim aşamasında tam olarak beklediği 23 özelliğin sıralı listesi
     MODEL_FEATURES = [
         'Founder_Type', 'Economic_Climate', 'Founder_Age', 'Founder_Experience_Years', 
         'Industry', 'Funding_Stage', 'Work_Mode', 'Team_Size', 'Startup_Age_Months', 
@@ -67,48 +77,41 @@ try:
     USE_ML = True
 except Exception as e:
     USE_ML = False
+    INIT_ERROR = str(e)
 
 
 def score(features: dict) -> ScoreResult:
-    """Askable feature'lardan Olgunluk Skoru ve Risk olasılığı üretir.
-
-    İmza, şema, orchestrator ve frontend tamamen dondurulmuştur.
-    """
+    """Askable feature'lardan Olgunluk Skoru ve Risk olasılığı üretir."""
     
     # -----------------------------------------------------------------
     # [DURUM A] GEÇERLİ BİR ML MODELİ VARSA (Sprint 2 Akışı)
     # -----------------------------------------------------------------
     if USE_ML:
         try:
-            # 1. Girdileri modelin tam olarak beklediği indeks sırasına göre matris dizisine ekliyoruz
             input_row = []
-            
             for col in MODEL_FEATURES:
                 raw_val = features.get(col, None)
                 
-                # Eğer kategorik bir sütunsa, eğitilen encoder ile sayıya çevir
                 if col in label_encoders:
                     le = label_encoders[col]
-                    val_str = str(raw_val) if raw_val is not None else "Seed" # Güvenli varsayılan
-                    
+                    val_str = str(raw_val) if raw_val is not None else "Seed"
                     if val_str in le.classes_:
                         input_row.append(le.transform([val_str])[0])
                     else:
                         input_row.append(0)
                 else:
-                    # Sayısal sütunlar için nötr varsayılan ata
                     input_row.append(_num(raw_val, 0.0))
 
-            # 2. ML Model Tahmini (m2cgen çıktısı doğrudan sınıf 1 -batma riski- olasılığını döner)
-            risk_probability = float(ml_logic.score(input_row))
+            # m2cgen çıktısı lokal testte iki elemanlı liste döndü: [Class_0, Class_1]
+            res = ml_logic.score(input_row)
+            if isinstance(res, (list, tuple)):
+                risk_probability = float(res[1])  # Sınıf 1: Batma Olasılığı
+            else:
+                risk_probability = float(res)
 
-            # Taban risk %1, tavan risk %99 sınırlandırması
             risk_probability = round(_clamp(risk_probability, 0.01, 0.99), 2)
-
-            # 3. Olgunluk Skorunu ML çıktısından deterministik olarak türet
             maturity_score = int(_clamp(round((1.0 - risk_probability) * 100), 0, 100))
 
-            # 4. Risk Bandını Belirle
             if risk_probability < 0.34:
                 risk_band = "Düşük"
             elif risk_probability < 0.67:
@@ -125,15 +128,14 @@ def score(features: dict) -> ScoreResult:
                     "Model Ayırt Ediciliği (ROC-AUC): %93.05 genellenebilirlik odaklı."
                 ],
             )
-        except Exception as e:
-            # Herhangi bir hata durumunda can yeleğini giyip kuralsal koda geçiyoruz
-            pass
+        except Exception as runtime_error:
+            # Çalışma anında bir hata olursa bunu yakalayıp aşağıda göstereceğiz
+            INIT_ERROR = f"Runtime Hatası: {runtime_error}"
 
     # -----------------------------------------------------------------
     # [DURUM B] ML MODELİ YOKSA VEYA HATA ALDIYSA (Sprint 1 Fallback Akışı)
     # -----------------------------------------------------------------
     funding_stage = features.get("Funding_Stage", "Seed")
-
     maturity = 50.0 + BRANCH_OFFSET.get(funding_stage, 0)
     risk = 0.15
     drivers: list[str] = []
@@ -212,7 +214,10 @@ def score(features: dict) -> ScoreResult:
     else:
         risk_band = "Yüksek"
 
-    if not drivers:
+    # Eğer arka planda bir import veya runtime hatası yakaladıysak ekranda göster
+    if INIT_ERROR:
+        drivers.append(f"🚨 ML Sinyal Hatası: {INIT_ERROR}")
+    elif not drivers:
         drivers.append("Girdiler dengeli — belirgin bir kritik sinyal yok")
 
     return ScoreResult(

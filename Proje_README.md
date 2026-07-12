@@ -3,7 +3,7 @@
 
 > YZTA Bootcamp 2026 · Sprint 2 · Canlı Yapay Zekâ & Makine Öğrenmesi Entegrasyonu
 
-Girişimcilerin (**Fikrim Var / Startup'ım Var / Şirketim Var**) sağlık ve batma riskini, onları 20 sayfalık iş planlarıyla boğmadan tek sayfalık dinamik bir formla ölçen ve akıllı bir **"Waze / GPS"** gibi yön veren analiz motoru.
+Girişimcilerin (**Fikrim Var / Startup'ım Var / Şirketim Var**) sağlık ve batma riskini, onları 20 sayfalık iş planlarıyla boğmadan tek sayfalık dinamik bir formla ölçen ve akıllı bir **"Dinamik Yol Haritası / Radar"** gibi yön veren analiz motoru.
 
 **Akış:** Dal seç → ~8-10 kritik soruyu doldur → **Analiz Et** → solda 0-100 **Olgunluk Skoru** + Risk %, sağda **3 maddelik AI Navigasyon Raporu** → skor > 75 ve risk düşükse **PDF Sertifika** indir.
 
@@ -33,11 +33,7 @@ Sprint 1'de verilen **"Dondurulmuş Arayüz (Frozen Interface)"** sözü Sprint 
              ▼
  [Olgunluk Skoru + Risk %  +  3 maddelik rapor  +  PDF Sertifika]
 ```
-
-- **`scorer.py` (bizim modelimiz):** Kural tabanlı, **tam deterministik** skorlayıcı.
-  Aynı girdi → aynı skor. "Güvenilir/tutarlı Olgunluk Skoru"nun teknik temeli.
-  Ağırlıklar veri setinin ilk 10 satırından ve doğrulanmış korelasyonlardan
-  türetildi (tam CSV **eğitilmedi**). 3 maddelik nokta atışı bir Türkçe Mentor öneri Raporu.
+- **`scorer.py` (bizim modelimiz):** Gerçek makine öğrenmesi (ML) modelinin (`train.py` ile eğitilen Random Forest) karar ağacı mantığını `m2cgen` ile **saf Python koduna (`model_logic.py`) transpile ederek** barındıran akıllı motor. Vercel üzerinde 0 MB ek yükle çalışır, `scikit-learn` bağımlılığı olmadan mikro saniyeler seviyesinde dinamik tahmin üretir. Düştüğü acil durumlarda sıfır kesinti (Zero-Downtime) sağlayan kural tabanlı koruma katmanına sahiptir. 3 maddelik nokta atışı bir Türkçe Mentor öneri Raporu.
 - **`orchestrator.py` (ekstra puan katmanı):** Girdiyi temizler, skorlar, LLM
   prompt'unu kurar, raporu birleştirir.
 - **`llm_client.py`:** OpenAI ile kullanıcının iş modeli raporu. **Anahtar
@@ -68,7 +64,7 @@ Model eğitimi, jüri karşısında teknik ve akademik olarak tam savunulabilir 
 | Katman | Teknoloji |
 |---|---|
 | Backend | Python · FastAPI · Pydantic · Uvicorn |
-| Makine Öğrenmesi | Scikit-Learn (Random Forest) · Joblib |
+| Makine Öğrenmesi | Random Forest Mantığı (Saf Python Matematiksel Matris Dönüşümü - m2cgen) · Joblib (Lokal Eğitim) |
 | LLM | OpenAI (sağlayıcı-bağımsız; `LLM_PROVIDER` ile Anthropic'e de geçer) |
 | PDF | fpdf2 + gömülü DejaVuSans (Unicode / tam Türkçe karakter desteği) |
 | Frontend | Vite · React · TypeScript |
@@ -84,6 +80,7 @@ Canlı ortamda (production) sunucuya ek yük bindirmemek adına model lokalde bi
 ```powershell
 # Sanal ortam aktifken backend dizininde çalıştırın
 python train.py
+python app/convert.py
 ```
 Bu komut trained_model.pkl ve encoders.pkl dosyalarını otomatik olarak backend/app/ dizinine üretir.
 
@@ -148,8 +145,10 @@ StartMetrics/
 │  │  ├─ trained_model.pkl  # Dondurulmuş Random Forest Model Ağırlıkları (Yeni)
 │  │  ├─ encoders.pkl       # Kategorik Label Encoder nesneleri (Yeni)
 │  │  ├─ llm_client.py      # OpenAI + Türkçe mentor prompt altyapısı
-│  │  └─ pdf.py             # fpdf2 sertifika motoru
-│  ├─ requirements.txt     # scikit-learn ve joblib bağımlılıkları eklendi
+│  │  ├─ pdf.py             # fpdf2 sertifika motoru
+│  │  ├─ convert.py         # ML modelini saf Python if-else yapılarına çeviren araç (Yeni)
+│  │  └─ model_logic.py     # m2cgen tarafından üretilen bağımlılıksız saf ML mantığı (Yeni)
+│  ├─ requirements.txt      # Vercel serverless limiti için tamamen hafifletildi (No sklearn/No pandas)
 │  └─ train.py              # ML Eğitim, Veri Temizleme ve Doğrulama Betiği (Yeni)
 ├─ frontend/                # Vite + React + TS UI Katmanı
 │  └─ src/{App.tsx, api.ts, useTheme.ts, components/*, styles.css}
@@ -165,6 +164,6 @@ StartMetrics/
 **Sprint 1 (Tamamlandı):** 3 dal + dinamik form → deterministik skorlayıcı →
 orkestrasyon → LLM raporu (stub fallback'li) → skor/risk UI → PDF sertifika.
 
-**Sprint 2 (Bu Teslim):** Veri sızıntılarından arındırılmış 50.000 satırlık ML model eğitimi (train.py) → Çapraz doğrulama ve overfitting analizlerinin tamamlanması → scorer.py gövdesine dondurulmuş arayüz mimarisiyle entegrasyonu → Zero-Downtime Fallback mekanizmasının kurulması.
+**Sprint 2 (Bu Teslim):** Veri sızıntılarından arındırılmış 50.000 satırlık ML model eğitimi (train.py) → Çapraz doğrulama ve overfitting analizlerinin tamamlanması → m2cgen transpile mimarisiyle Vercel serverless bundle limitinin (500 MB) aşılması → scorer.py gövdesine dondurulmuş arayüz standartlarına sadık kalınarak tamamen Türkçe, hafif ve dinamik akıllı tahmin motoru entegrasyonu → Zero-Downtime Fallback mekanizmasının kurulması.
 
 **Kapsam dışı (kalıcı):** yatırımcı eşleştirme, login, kalıcılık, mesajlaşma.

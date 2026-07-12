@@ -141,7 +141,7 @@ def _stub_report(result: ScoreResult) -> dict:
     for i in range(3):
         driver = drivers[i] if i < len(drivers) else None
         if driver:
-            body = f"Waze uyarısı: {driver}. Bu sinyali önümüzdeki 2 haftada ele al."
+            body = f"Akıllı radar uyarısı : {driver}. Bu sinyali önümüzdeki 2 haftada ele al."
         else:
             body = "Rota temiz görünüyor; bir sonraki 5 müşteri görüşmeni planla."
         items.append({"title": titles[i], "body": body})

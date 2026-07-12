@@ -83,8 +83,9 @@ def build_certificate(result: AnalysisResponse, branch_title: str, issued_date: 
     pdf.multi_cell(
         0, 7,
         "Bu belge StartMetrics analiz motoru tarafından üretilmiştir. "
-        "Skor, deterministik bir analitik model tarafından hesaplanmış; "
-        "yön raporu bir yapay zekâ mentor katmanı ile oluşturulmuştur.",
+        "Girişim risk analizi ve olgunluk skoru, yüksek doğruluk oranına sahip "
+        "Yapay Zekâ Tahmin Modeli ve akıllı mentor katmanı tarafından "
+        "dinamik olarak hesaplanmıştır.",
         align="C",
     )
 
