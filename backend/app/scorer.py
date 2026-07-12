@@ -2,6 +2,9 @@
 scorer.py — StartMetrics Hibrit Analitik ve ML Model Motoru (Sprint 1 + Sprint 2).
 
 ARAYÜZ DONDURULMUŞTUR: `score(features) -> ScoreResult`.
+Eğer 'trained_model.pkl' mevcutsa, sistem otomatik olarak eğitilmiş Random Forest
+modelini kullanır. Model henüz eğitilmediyse veya dosya silindiyse, sistem 
+hiçbir hata fırlatmadan tam deterministik kural tabanlı modele (Fallback) geri döner.
 """
 
 from __future__ import annotations
@@ -22,6 +25,7 @@ BRANCH_OFFSET = {
 @dataclass
 class ScoreResult:
     """Skorlayıcının çıktısı. UI ve LLM zemini bu nesneyi tüketir."""
+
     maturity_score: int          # 0-100 Olgunluk/Sağlık Skoru
     risk_probability: float      # 0-1 Kapanma/Batma olasılığı
     risk_band: str               # "Düşük" | "Orta" | "Yüksek"
@@ -45,7 +49,10 @@ def _num(value, default: float) -> float:
 # =================================================================
 # ⚙️ MODEL ENTEGRASYON VE YÜKLEME KATMANI (DİNAMİK YOL GÜNCELLEMESİ)
 # =================================================================
+# scorer.py dosyasının bulunduğu klasörün tam yolunu alıyoruz (app klasörü)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# .pkl dosyalarının yollarını bu klasöre göre dinamik olarak kilitliyoruz
 MODEL_PATH = os.path.join(BASE_DIR, "trained_model.pkl")
 ENCODER_PATH = os.path.join(BASE_DIR, "encoders.pkl")
 
@@ -63,41 +70,46 @@ else:
 
 
 def score(features: dict) -> ScoreResult:
-    """Askable feature'lardan Olgunluk Skoru ve Risk olasılığı üretir."""
+    """Askable feature'lardan Olgunluk Skoru ve Risk olasılığı üretir.
+
+    İmza, şema, orchestrator ve frontend tamamen dondurulmuştur.
+    """
     
     # -----------------------------------------------------------------
     # [DURUM A] GEÇERLİ BİR ML MODELİ VARSA (Sprint 2 Akışı)
     # -----------------------------------------------------------------
     if USE_ML:
         try:
-            # 1. Pandas yerine saf Python listesiyle girdiyi hazırlıyoruz
+            # 1. Pandas yerine Saf Python listesi ile girdiyi hazırlıyoruz
             input_row = []
             
-            # Modelin tam olarak beklediği sütun sırasına göre özellikleri matrise diziyoruz
+            # Modelin beklediği sütun sırasına göre özellikleri hazırla
             for col in MODEL_FEATURES:
                 raw_val = features.get(col, None)
                 
                 # Eğer kategorik bir sütunsa, eğitilen encoder ile sayıya çevir
                 if col in label_encoders:
                     le = label_encoders[col]
-                    val_str = str(raw_val) if raw_val is not None else "Seed"
+                    val_str = str(raw_val) if raw_val is not None else "Seed" # Güvenli varsayılan
                     
                     if val_str in le.classes_:
                         input_row.append(le.transform([val_str])[0])
                     else:
+                        # Bilinmeyen bir kategori gelirse ilk sınıfa eşitle (Out of vocabulary koruması)
                         input_row.append(0)
                 else:
-                    # Sayısal sütunlar için nötr varsayılan ata
+                    # Sayısal sütunlar için nötr varsayılan ata (Form boş bırakıldıysa çökme engelleme)
                     input_row.append(_num(raw_val, 0.0))
 
-            # 2. ML Model Tahmini (İki boyutlu saf Python listesi besliyoruz [[...]])
+            # 2. ML Model Tahmini (scikit-learn iki boyutlu saf Python listesi kabul eder: [[...]])
             probabilities = ml_model.predict_proba([input_row])[0]
             risk_probability = float(probabilities[1])
 
-            # Taban risk %1, tavan risk %99 sınırlandırması
+            # Taban risk %1, tavan risk %99 sınırlandırması (Sprint 1 UI standartları korundu)
             risk_probability = round(_clamp(risk_probability, 0.01, 0.99), 2)
 
-            # 3. Olgunluk Skorunu ML çıktısından türet
+            # 3. Olgunluk Skorunu ML çıktısından deterministik olarak türet
+            # Başarısızlık olasılığı ne kadar yüksekse, olgunluk skoru o kadar düşüktür.
             maturity_score = int(_clamp(round((1.0 - risk_probability) * 100), 0, 100))
 
             # 4. Risk Bandını Belirle
@@ -113,17 +125,19 @@ def score(features: dict) -> ScoreResult:
                 risk_probability=risk_probability,
                 risk_band=risk_band,
                 drivers=[
-                    "[ML MODELİ] Tahmin örüntüleri başarıyla işlendi.",
-                    "Model Ayırt Ediciliği (ROC-AUC): %93.05 genellenebilirlik odaklı."
+                    f"[ML MODELİ] Tahmin örüntüleri başarıyla işlendi.",
+                    f"Model Ayırt Ediciliği (ROC-AUC): %93.05 genellenebilirlik odaklı."
                 ],
             )
         except Exception as e:
+            # ML operasyonunda anlık bir hata oluşursa sistem can yeleğini giyer ve aşağı kayar
             pass
 
     # -----------------------------------------------------------------
     # [DURUM B] ML MODELİ YOKSA VEYA HATA ALDIYSA (Sprint 1 Fallback Akışı)
     # -----------------------------------------------------------------
     funding_stage = features.get("Funding_Stage", "Seed")
+
     maturity = 50.0 + BRANCH_OFFSET.get(funding_stage, 0)
     risk = 0.15
     drivers: list[str] = []
