@@ -58,7 +58,7 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
 ---
 
 <details>
-  <summary><h2>Sprint 1</h2></summary>
+  <summary><h2>Sprint 1</h2><br><em>Detaylar için tıklayınız</em></summary>
 
 - **Sprint Puanları**
 
@@ -105,7 +105,7 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
 
 
 <details>
-  <summary><h2>Sprint 2</h2></summary>
+  <summary><h2>Sprint 2</h2><br><em>Detaylar için tıklayınız</em></summary>
 
 
 
@@ -113,7 +113,7 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
 
 
 <details>
-  <summary><h2>Sprint 3</h2></summary>
+  <summary><h2>Sprint 3</h2><br><em>Detaylar için tıklayınız</em></summary>
 
 </details>
 
