@@ -3,7 +3,9 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   analyze,
   fetchConfig,
+  generateComprehensiveReport,
   type AnalysisResponse,
+  type ComprehensiveReportResponse,
   type ConfigResponse,
 } from "./api";
 import { useTheme } from "./useTheme";
@@ -11,6 +13,8 @@ import ParticleBackground from "./components/ParticleBackground";
 import DynamicForm from "./components/DynamicForm";
 import ScoreCard from "./components/ScoreCard";
 import NavigationReport from "./components/NavigationReport";
+import MethodologyForm, { METHODOLOGY_CONFIGS } from "./components/MethodologyForm";
+import ComprehensiveResult from "./components/ComprehensiveResult";
 
 const BRANCH_ORDER = ["fikrim_var", "startup_var", "sirketim_var"] as const;
 const BRANCH_TONE: Record<string, string> = {
@@ -19,14 +23,21 @@ const BRANCH_TONE: Record<string, string> = {
   sirketim_var: "Şirketini verimlilik ve yön açısından baştan aşağı check-up'tan geçirelim.",
 };
 
-// Veri setindeki teknik funding_stage değerlerini kullanıcıya gösterilecek
-// sade Türkçe aşama etiketlerine çevirir (Pre-Seed vb. ham değer gösterilmez).
 const STAGE_LABEL: Record<string, string> = {
   "Pre-Seed": "Fikir Aşaması",
   Seed: "Erken Aşama",
   Bootstrapped: "Büyüme Aşaması",
   "Series A": "Ölçekleme Aşaması",
 };
+
+// Adım göstergesi etiketleri
+const STEP_LABELS = [
+  "Bilgi Formu",
+  "Navigasyon Raporu",
+  "Metodoloji 1",
+  "Metodoloji 2",
+  "Sonuç",
+];
 
 function BrandMark() {
   return (
@@ -37,12 +48,47 @@ function BrandMark() {
   );
 }
 
+// Adım göstergesi bileşeni (Adım 1-5)
+function StepIndicator({ step }: { step: number }) {
+  return (
+    <div className="step-indicator">
+      {STEP_LABELS.map((label, i) => {
+        const stepNum = i + 1;
+        const isActive = stepNum === step;
+        const isDone = stepNum < step;
+        return (
+          <div key={i} className={`step-item ${isActive ? "active" : ""} ${isDone ? "done" : ""}`}>
+            <div className="step-circle">
+              {isDone ? "✓" : stepNum}
+            </div>
+            <span className="step-label">{label}</span>
+            {i < STEP_LABELS.length - 1 && <div className="step-line" />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function App() {
   const { theme, toggle } = useTheme();
   const [config, setConfig] = useState<ConfigResponse | null>(null);
   const [branch, setBranch] = useState<string | null>(null);
+
+  // Adım yönetimi (1-5)
+  const [step, setStep] = useState(1);
+
+  // Adım 1 verileri
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
-  const [result, setResult] = useState<AnalysisResponse | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null);
+
+  // Adım 3-4 verileri
+  const [methodology1, setMethodology1] = useState<Record<string, string>>({});
+  const [methodology2, setMethodology2] = useState<Record<string, string>>({});
+
+  // Adım 5 verisi
+  const [comprehensiveResult, setComprehensiveResult] = useState<ComprehensiveReportResponse | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,17 +100,24 @@ export default function App() {
 
   function reset() {
     setBranch(null);
+    setStep(1);
     setAnswers({});
-    setResult(null);
+    setAnalysisResult(null);
+    setMethodology1({});
+    setMethodology2({});
+    setComprehensiveResult(null);
     setError(null);
   }
 
+  // Adım 1 → 2: /api/analyze çağrısı (mevcut, dokunulmadı)
   async function handleAnalyze() {
     if (!branch) return;
     setLoading(true);
     setError(null);
     try {
-      setResult(await analyze(branch, answers));
+      const result = await analyze(branch, answers);
+      setAnalysisResult(result);
+      setStep(2);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Bir hata oluştu");
     } finally {
@@ -72,7 +125,28 @@ export default function App() {
     }
   }
 
-  // ===== EKRAN 1: Hoş geldin (koyu hero + partikül) =====
+  // Adım 4 → 5: /api/comprehensive-report çağrısı
+  async function handleComprehensiveReport() {
+    if (!branch) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await generateComprehensiveReport(
+        branch,
+        answers,
+        methodology1,
+        methodology2
+      );
+      setComprehensiveResult(result);
+      setStep(5);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Rapor oluşturulamadı");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ===== EKRAN 0: Hoş geldin (hero) =====
   if (!branch) {
     return (
       <div className="hero">
@@ -105,13 +179,13 @@ export default function App() {
 
           <motion.p
             className="hero-lead"
-            style={{ maxWidth: '700px' }}
+            style={{ maxWidth: "700px" }}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.12 }}
           >
-            Olgunluk skorunu ölç, batma riskini gör, önündeki 3 kritik virajı
-            yapay zeka analizimizle erkenden öğren. Nerede olduğunu seç — sana yol gösterelim.
+            5 aşamalı analiz süreciyle olgunluk skorunu ölç, metodolojini test et ve
+            kişiselleştirilmiş AI yol haritanı al. Nerede olduğunu seç — sana yol gösterelim.
           </motion.p>
 
           {error && <div className="error-banner">{error}</div>}
@@ -122,7 +196,10 @@ export default function App() {
                 <motion.button
                   key={key}
                   className="branch-card"
-                  onClick={() => setBranch(key)}
+                  onClick={() => {
+                    setBranch(key);
+                    setStep(1);
+                  }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 + i * 0.1 }}
@@ -141,14 +218,45 @@ export default function App() {
   }
 
   const branchConfig = config![branch];
+  const methodologyConfig = METHODOLOGY_CONFIGS[branch];
 
-  // ===== EKRAN 2: Form + Sonuç =====
+  // ===== EKRAN 5: Kapsamlı Sonuç =====
+  if (step === 5 && comprehensiveResult) {
+    return (
+      <div className="app-shell">
+        <header className="app-header">
+          <BrandMark />
+          <div className="header-actions">
+            <button className="theme-toggle light" onClick={toggle}>
+              {theme === "dark" ? "☀️" : "🌙"}
+            </button>
+            <button className="back-btn" onClick={reset}>
+              ← Baştan başla
+            </button>
+          </div>
+        </header>
+        <div className="container">
+          <StepIndicator step={5} />
+          <ComprehensiveResult
+            result={comprehensiveResult}
+            branch={branch}
+            step1Answers={answers}
+            methodology1Answers={methodology1}
+            methodology2Answers={methodology2}
+            onRestart={reset}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // ===== EKRANLAR 1-4: Form akışı =====
   return (
     <div className="app-shell">
       <header className="app-header">
         <BrandMark />
         <div className="header-actions">
-          <button className="theme-toggle light" onClick={toggle} title="Tema değiştir">
+          <button className="theme-toggle light" onClick={toggle}>
             {theme === "dark" ? "☀️" : "🌙"}
           </button>
           <button className="back-btn" onClick={reset}>
@@ -158,6 +266,8 @@ export default function App() {
       </header>
 
       <div className="container">
+        <StepIndicator step={step} />
+
         <div className="branch-heading">
           <h2>{branchConfig.title}</h2>
           <span className="branch-chip">
@@ -169,25 +279,69 @@ export default function App() {
         {error && <div className="error-banner">{error}</div>}
 
         <AnimatePresence mode="wait">
-          {!result ? (
+          {/* Adım 1: Kullanıcı Bilgi Formu */}
+          {step === 1 && (
             <DynamicForm
-              key="form"
+              key="step1-form"
               config={branchConfig}
               answers={answers}
               onChange={(k, v) => setAnswers((p) => ({ ...p, [k]: v }))}
               onSubmit={handleAnalyze}
               loading={loading}
             />
-          ) : (
+          )}
+
+          {/* Adım 2: Navigasyon Raporu */}
+          {step === 2 && analysisResult && (
             <motion.div
-              key="result"
+              key="step2-result"
               className="result-grid"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
-              <ScoreCard result={result} />
-              <NavigationReport result={result} branch={branch} answers={answers} />
+              <ScoreCard result={analysisResult} />
+              <div className="nav-report-wrapper">
+                <NavigationReport result={analysisResult} branch={branch} answers={answers} />
+                <motion.button
+                  className="continue-btn"
+                  onClick={() => setStep(3)}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  Metodoloji Analizine Devam Et →
+                </motion.button>
+              </div>
             </motion.div>
+          )}
+
+          {/* Adım 3: Metodoloji Formu-1 */}
+          {step === 3 && methodologyConfig && (
+            <MethodologyForm
+              key="step3-methodology"
+              config={methodologyConfig.step3}
+              answers={methodology1}
+              onChange={(k, v) => setMethodology1((p) => ({ ...p, [k]: v }))}
+              onSubmit={() => setStep(4)}
+              onBack={() => setStep(2)}
+              submitLabel="Devam Et →"
+            />
+          )}
+
+          {/* Adım 4: Metodoloji Formu-2 */}
+          {step === 4 && methodologyConfig && (
+            <MethodologyForm
+              key="step4-methodology"
+              config={methodologyConfig.step4}
+              answers={methodology2}
+              onChange={(k, v) => setMethodology2((p) => ({ ...p, [k]: v }))}
+              onSubmit={handleComprehensiveReport}
+              onBack={() => setStep(3)}
+              submitLabel={loading ? "Rapor Oluşturuluyor…" : "⚡ Kapsamlı Rapor Oluştur"}
+              loading={loading}
+            />
           )}
         </AnimatePresence>
       </div>
