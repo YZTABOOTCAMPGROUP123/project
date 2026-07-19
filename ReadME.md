@@ -107,7 +107,42 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
 <details>
   <summary><h2>Sprint 2</h2><br><em>Detaylar için tıklayınız</em></summary>
 
+- **Sprint Puanları**
 
+   Toplam Backlog Puanı: 274 Puan
+
+   Sprint 2 Hedefi: 104 Puan
+
+- **Sprint Board Durumu**
+
+buraya sprint board gelecek
+
+- **Ürün Durumu**
+
+  ürün resimleri gelecek buraya
+
+
+
+- **Sprint Review**: 
+  * Birden fazla Yapay Zeka Platformunun desteğinin eklenmesinin başlanması
+  * Backlog için Github Projects'in yetersiz olduğuna karar verilmesi
+  * Github PR özelliğinin Vercel alt yapısıyla aktif kullanımı
+  * Github Projects Backlog görüntüsünün asistan geri dönütü üzerine güncellenmesi
+  * Vercel'de deploy edilen previewların herkes tarafından erişilebilir yapılması
+  * Proje içerisinde test dosylarının oluşturulması
+  * Proje içerisindeki formların geliştirilmesi
+
+  **Sprint Review Katılımcıları:**
+    - Elif Berber 
+    - Furkan Uysal
+    - Muhammed Esat Demir 
+    - Utku Uyanık
+    - Zeynep Tanrıvermiş
+
+- **Sprint Retrospective:**
+  - Github Projects'in Viewları tek bir veri setine bağlı olduğundan yetersiz olduğunun anlaşılması
+  - Main branşa dökümantasyon geliştirilmeleri dışında review atılmadan commit yapılmaması
+  - Hibrit yapının ilk adımlarının preview özelliği ile bu [bağlantıdan](https://start-metrics-git-utkuynk-start-metrics.vercel.app/) erişilebilir yapılması
 
 </details>
 
