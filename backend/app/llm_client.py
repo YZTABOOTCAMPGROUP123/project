@@ -12,7 +12,6 @@ devreye girer — demo asla çökmez, UI birebir aynı görünür (report_source
 """
 
 from __future__ import annotations
-from google.genai.types import ThinkingConfig
 
 import json
 import os
@@ -40,7 +39,7 @@ def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
         {"items": [{"title","body"} x3], "source": "llm" | "stub"}
     Bu fonksiyon hiçbir zaman exception fırlatmaz; hata durumunda stub'a düşer.
     """
-    provider = os.getenv("LLM_PROVIDER", "gemini").lower()
+    provider = os.getenv("LLM_PROVIDER", "openai").lower()
     api_key = (
         os.getenv("OPENAI_API_KEY")
         or os.getenv("ANTHROPIC_API_KEY")
