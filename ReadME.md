@@ -140,8 +140,9 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
   * Backlog için Github Projects'in yetersiz olduğuna karar verilmesi
   * Github PR özelliğinin Vercel alt yapısıyla aktif kullanımı
   * Github Projects Backlog görüntüsünün asistan geri dönütü üzerine güncellenmesi
+  * Sprint kısımlarının açıp kapanılabilir olduğunun asistan geri dönütü üzerine güncellenmesi
   * Vercel'de deploy edilen previewların herkes tarafından erişilebilir yapılması
-  * Proje içerisinde test dosylarının oluşturulması
+  * Proje içerisinde test dosyalarının oluşturulması
   * Proje içerisindeki formların geliştirilmesi
 
   **Sprint Review Katılımcıları:**
