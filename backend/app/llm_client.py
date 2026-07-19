@@ -233,7 +233,7 @@ def generate_comprehensive_report(
         {"roadmap": "<markdown metin>", "source": "llm" | "stub"}
     Bu fonksiyon hiçbir zaman exception fırlatmaz; hata durumunda stub'a düşer.
     """
-    provider = os.getenv("LLM_PROVIDER", "gemini").lower()
+    provider = os.getenv("LLM_PROVIDER", "openai").lower()
     api_key = (
         os.getenv("OPENAI_API_KEY")
         or os.getenv("ANTHROPIC_API_KEY")
@@ -241,7 +241,7 @@ def generate_comprehensive_report(
         or os.getenv("OPENROUTER_API_KEY")
     )
 
-    if not api_key:
+    if not provider:
         return _stub_comprehensive_report(score_result)
 
     try:
