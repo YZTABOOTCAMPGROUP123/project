@@ -115,11 +115,23 @@ Platformun en büyük ayırt edici gücü, kullanıcıların iş modellerinin ol
 
 - **Sprint Board Durumu**
 
-buraya sprint board gelecek
+<img width="2376" height="2988" alt="startmetrics_sprint2" src="https://github.com/user-attachments/assets/117b99d8-b398-497b-bd8a-7ad6b0a5dcf0" />
+
 
 - **Ürün Durumu**
 
-  ürün resimleri gelecek buraya
+
+<img width="3024" height="1764" alt="screencapture-start-metrics-git-utkuynk-start-metrics-vercel-app-2026-07-19-17_18_29" src="https://github.com/user-attachments/assets/60e635ac-d378-4167-ae2c-86026f8c6831" />
+<img width="3024" height="1798" alt="screencapture-start-metrics-git-utkuynk-start-metrics-vercel-app-2026-07-19-17_18_37" src="https://github.com/user-attachments/assets/6a076a8d-5d14-4eae-bdc2-d7ad1c1d7142" />
+<img width="3024" height="2014" alt="screencapture-start-metrics-git-utkuynk-start-metrics-vercel-app-2026-07-19-17_19_08" src="https://github.com/user-attachments/assets/4047db08-2300-4cde-953f-32004c602670" />
+<img width="3024" height="2582" alt="screencapture-start-metrics-git-utkuynk-start-metrics-vercel-app-2026-07-19-17_19_15" src="https://github.com/user-attachments/assets/f60aa390-32f0-4f5c-ac74-7a01cf12ed73" />
+<img width="3024" height="2316" alt="screencapture-start-metrics-git-utkuynk-start-metrics-vercel-app-2026-07-19-17_19_32" src="https://github.com/user-attachments/assets/9219f961-89b2-4440-b8ca-cc7236856c27" />
+<img width="3024" height="4596" alt="screencapture-start-metrics-git-utkuynk-start-metrics-vercel-app-2026-07-19-17_19_57" src="https://github.com/user-attachments/assets/aeb00150-58ce-4c3b-ad5a-21bf72a47cac" />
+
+
+
+
+
 
 
 
