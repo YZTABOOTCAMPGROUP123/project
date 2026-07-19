@@ -48,7 +48,7 @@ def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
         or os.getenv("OPENROUTER_API_KEY")
     )
 
-    if not api_key:
+    if not provider:
         return _stub_report(result)
 
     try:
