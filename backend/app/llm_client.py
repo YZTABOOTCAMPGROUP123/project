@@ -103,17 +103,27 @@ def _call_openai(system_prompt: str, user_prompt: str, max_tokens: int, temperat
     from openai import OpenAI
 
     api_key = os.getenv("OPENAI_API_KEY")
-    client = OpenAI(api_key=api_key)
+    # timeout ve max_retries açıkça veriliyor: Vercel'de görülen geçici
+    # "Connection error." (APIConnectionError) durumlarına karşı tolerans.
+    # Varsayılan SDK ayarları bazı serverless ortamlarında ilk denemede
+    # bağlantıyı çok çabuk pes ettirebiliyor.
+    client = OpenAI(api_key=api_key, timeout=30.0, max_retries=3)
     model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    resp = client.chat.completions.create(
-        model=model,
-        max_tokens=max_tokens,
-        temperature=temperature,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-    )
+    try:
+        resp = client.chat.completions.create(
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        )
+    except Exception as e:
+        # Teşhis için exception tipini de logla — sadece mesaj yeterli değil,
+        # "Connection error." tüm bağlantı hatalarını aynı metinle sarıyor.
+        print(f"OpenAI çağrısı sırasında exception tipi: {type(e).__name__}, detay: {repr(e)}", flush=True)
+        raise
     return resp.choices[0].message.content or ""
 
 
