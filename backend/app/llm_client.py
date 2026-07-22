@@ -77,8 +77,9 @@ def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
 
         items = _parse_three_items(text)
         return {"items": items, "source": "llm"}
-    except Exception:
+    except Exception as e:
         # Ağ/parse/kota — ne olursa olsun demo çalışsın.
+        print(f"generate_report LLM API Hatası: {e}", flush=True)
         return _stub_report(result)
 
 
@@ -283,8 +284,10 @@ def generate_comprehensive_report(
             return _stub_comprehensive_report(score_result)
 
         return {"roadmap": text.strip(), "source": "llm"}
-    except Exception:
-        return _stub_comprehensive_report(score_result)
+    except Exception as e:
+        # Ağ/parse/kota — ne olursa olsun demo çalışsın.
+        print(f"generate_report LLM API Hatası: {e}", flush=True)
+        return _stub_report(result)
 
 
 def _build_comprehensive_prompt(
