@@ -141,7 +141,7 @@ def _call_openai(system_prompt: str, user_prompt: str, max_tokens: int, temperat
 
     api_key = os.getenv("OPENAI_API_KEY")
     client = OpenAI(api_key=api_key)
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    model = os.getenv("OPENAI_MODEL", "gpt-4o")
     resp = client.chat.completions.create(
         model=model,
         max_tokens=max_tokens,
