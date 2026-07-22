@@ -27,7 +27,8 @@ SYSTEM_PROMPT = (
     "Her madde en fazla 2 cümle olsun ve bir yol/rota metaforu içersin "
     "(örn. 'Önünde görünmez bir duvar var…', 'Bu virajda yavaşla…'). "
     "Genel motivasyon cümlesi KURMA; sadece bu veriye özel, somut, aksiyon "
-    "alınabilir uyarılar ver. Yanıtı SADECE şu formatta bir JSON dizisi olarak "
+    "alınabilir uyarılar ver. Yanıtın kesinlikle TÜRKÇE olmalıdır. "
+    "Yanıtı SADECE şu formatta bir JSON dizisi olarak "
     'döndür: [{"title": "...", "body": "..."}, ...] — tam 3 eleman, başka metin yok.'
 )
 
@@ -39,7 +40,18 @@ def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
         {"items": [{"title","body"} x3], "source": "llm" | "stub"}
     Bu fonksiyon hiçbir zaman exception fırlatmaz; hata durumunda stub'a düşer.
     """
-    provider = os.getenv("LLM_PROVIDER", "openai").lower()
+    provider = os.getenv("LLM_PROVIDER")
+    if provider:
+        provider = provider.lower()
+    elif os.getenv("OPENAI_API_KEY"):
+        provider = "openai"
+    elif os.getenv("ANTHROPIC_API_KEY"):
+        provider = "anthropic"
+    elif os.getenv("GEMINI_API_KEY"):
+        provider = "gemini"
+    else:
+        provider = "openrouter"
+        
     api_key = (
         os.getenv("OPENAI_API_KEY")
         or os.getenv("ANTHROPIC_API_KEY")
@@ -47,7 +59,7 @@ def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
         or os.getenv("OPENROUTER_API_KEY")
     )
 
-    if not provider:
+    if not api_key:
         return _stub_report(result)
 
     try:
@@ -233,7 +245,18 @@ def generate_comprehensive_report(
         {"roadmap": "<markdown metin>", "source": "llm" | "stub"}
     Bu fonksiyon hiçbir zaman exception fırlatmaz; hata durumunda stub'a düşer.
     """
-    provider = os.getenv("LLM_PROVIDER", "openai").lower()
+    provider = os.getenv("LLM_PROVIDER")
+    if provider:
+        provider = provider.lower()
+    elif os.getenv("OPENAI_API_KEY"):
+        provider = "openai"
+    elif os.getenv("ANTHROPIC_API_KEY"):
+        provider = "anthropic"
+    elif os.getenv("GEMINI_API_KEY"):
+        provider = "gemini"
+    else:
+        provider = "openrouter"
+        
     api_key = (
         os.getenv("OPENAI_API_KEY")
         or os.getenv("ANTHROPIC_API_KEY")
@@ -241,7 +264,7 @@ def generate_comprehensive_report(
         or os.getenv("OPENROUTER_API_KEY")
     )
 
-    if not provider:
+    if not api_key:
         return _stub_comprehensive_report(score_result)
 
     try:
