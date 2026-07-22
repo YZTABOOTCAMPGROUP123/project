@@ -1,14 +1,23 @@
 """
-llm_client.py — AI Yön Raporu üretici (OpenAI + sağlayıcı-bağımsız + stub fallback).
+llm_client.py — AI Yön Raporu üretici (sağlayıcı-bağımsız + stub fallback).
 
 Sorumluluk: skorlayıcının çıktısını ve ~8-10 alanı bir Türkçe mentor prompt'una
 gömüp LLM'den TAM 3 maddelik Waze/GPS tarzı bir navigasyon raporu almak.
 
+Sağlayıcı seçimi: LLM_PROVIDER ortam değişkeni ile yapılır
+(openai | anthropic | gemini | openrouter). Varsayılan: openai.
+
 Token tasarrufu: prompt'a SADECE alanlar + skor girer; ASLA CSV satırı girmez.
 max_tokens düşük tutulur, tıklama başına tek çağrı yapılır.
 
-Dayanıklılık: API anahtarı yoksa VEYA çağrı/parse hatası olursa `_stub_report`
-devreye girer — demo asla çökmez, UI birebir aynı görünür (report_source="stub").
+Dayanıklılık: seçili sağlayıcının API anahtarı yoksa VEYA çağrı/parse hatası
+olursa `_stub_report` devreye girer — demo asla çökmez, UI birebir aynı
+görünür (report_source="stub").
+
+NOT: google-genai / anthropic / openai gibi sağlayıcı SDK'ları burada
+FONKSİYON İÇİNDE import edilir (üst seviyede değil). Bunun nedeni: sadece
+kullandığın sağlayıcının paketinin requirements.txt'de olması yeterli olsun;
+diğer paketler kurulu olmasa bile modül import edilirken patlamasın.
 """
 
 from __future__ import annotations
@@ -32,6 +41,59 @@ SYSTEM_PROMPT = (
     'döndür: [{"title": "...", "body": "..."}, ...] — tam 3 eleman, başka metin yok.'
 )
 
+COMPREHENSIVE_SYSTEM_PROMPT = (
+    "Sen StartMetrics platformunun strateji danışmanısın. Bir girişimcinin 4 aşamalık "
+    "analiz sürecinden elde edilen verilere bakarak kapsamlı, kişiselleştirilmiş ve "
+    "uygulanabilir bir stratejik yol haritası raporu yazacaksın. "
+    "Rapor Türkçe olacak. Markdown formatında olacak (## başlıklar, - madde işaretleri). "
+    "Şu bölümleri içermelidir: "
+    "## 🎯 Genel Değerlendirme (2-3 cümle özet), "
+    "## 💡 Kritik Bulgular (en önemli 3-5 tespit), "
+    "## 🗺️ 30 Günlük Eylem Planı (somut adımlar), "
+    "## 🚀 90 Günlük Büyüme Rotası (stratejik yönelim), "
+    "## ⚠️ Öncelikli Riskler ve Çözüm Önerileri. "
+    "Genel tavsiyeler değil, VERİLERE ÖZGÜ, uygulanabilir öneriler ver. "
+    "Motivasyon konuşması yapma."
+)
+
+# Sağlayıcı adı -> o sağlayıcının API anahtarını tuttuğu ortam değişkeni
+_PROVIDER_KEY_ENV = {
+    "openai": "OPENAI_API_KEY",
+    "anthropic": "ANTHROPIC_API_KEY",
+    "gemini": "GEMINI_API_KEY",
+    "openrouter": "OPENROUTER_API_KEY",
+}
+
+
+def _active_provider_and_key() -> tuple[str, str | None]:
+    """LLM_PROVIDER ortam değişkenine göre aktif sağlayıcıyı ve anahtarını döndürür."""
+    provider = os.getenv("LLM_PROVIDER", "openai").strip().lower()
+    if provider not in _PROVIDER_KEY_ENV:
+        # Bilinmeyen bir değer yazılmışsa openai'ye düş (ama uyar).
+        print(f"Bilinmeyen LLM_PROVIDER='{provider}', 'openai' varsayılana dönülüyor.", flush=True)
+        provider = "openai"
+    api_key = os.getenv(_PROVIDER_KEY_ENV[provider])
+    return provider, api_key
+
+
+def _dispatch_call(
+    provider: str,
+    system_prompt: str,
+    user_prompt: str,
+    max_tokens: int,
+    temperature: float,
+) -> str:
+    """Aktif sağlayıcıya göre doğru _call_* fonksiyonunu çağırır."""
+    if provider == "openai":
+        return _call_openai(system_prompt, user_prompt, max_tokens, temperature)
+    if provider == "anthropic":
+        return _call_anthropic(system_prompt, user_prompt, max_tokens, temperature)
+    if provider == "gemini":
+        return _call_gemini(system_prompt, user_prompt, max_tokens, temperature)
+    if provider == "openrouter":
+        return _call_openrouter(system_prompt, user_prompt, max_tokens, temperature)
+    raise ValueError(f"Desteklenmeyen LLM_PROVIDER: {provider}")
+
 
 def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
     """3 maddelik navigasyon raporu üretir.
@@ -40,24 +102,25 @@ def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
         {"items": [{"title","body"} x3], "source": "llm" | "stub"}
     Bu fonksiyon hiçbir zaman exception fırlatmaz; hata durumunda stub'a düşer.
     """
-    provider = "openai"
-    api_key = os.getenv("OPENAI_API_KEY")
+    provider, api_key = _active_provider_and_key()
 
     if not api_key:
+        print(f"'{provider}' için API anahtarı bulunamadı, stub rapora düşülüyor.", flush=True)
         return _stub_report(result)
 
     try:
         user_prompt = _build_user_prompt(branch, features, result)
-        text = _call_openai(user_prompt)
+        text = _dispatch_call(provider, SYSTEM_PROMPT, user_prompt, max_tokens=400, temperature=0.5)
 
         items = _parse_three_items(text)
         return {"items": items, "source": "llm"}
-        
+
     except Exception as e:
-        print(f"generate_report LLM API Hatası: {e}", flush=True)
+        print(f"generate_report LLM API Hatası ({provider}): {e}", flush=True)
         fallback = _stub_report(result)
         fallback["items"][0]["body"] = f"🔴 API HATASI: {e} | " + fallback["items"][0]["body"]
         return fallback
+
 
 def _build_user_prompt(branch: str, features: dict, result: ScoreResult) -> str:
     """Prompt'a sadece askable alanlar + skor girer (CSV satırı ASLA)."""
@@ -73,63 +136,61 @@ def _build_user_prompt(branch: str, features: dict, result: ScoreResult) -> str:
     )
 
 
-def _call_openai(user_prompt: str) -> str:
+def _call_openai(system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
     from openai import OpenAI
-    
+
     api_key = os.getenv("OPENAI_API_KEY")
     client = OpenAI(api_key=api_key)
-    model = os.getenv("OPENAI_MODEL", "gpt-4o")
+    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
     resp = client.chat.completions.create(
         model=model,
-        max_tokens=400,
-        temperature=0.5,
+        max_tokens=max_tokens,
+        temperature=temperature,
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
     )
     return resp.choices[0].message.content or ""
 
 
-def _call_anthropic(user_prompt: str) -> str:
+def _call_anthropic(system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
     import anthropic
 
     client = anthropic.Anthropic()  # ANTHROPIC_API_KEY env'den okunur
     model = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
     msg = client.messages.create(
         model=model,
-        max_tokens=400,
-        system=SYSTEM_PROMPT,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        system=system_prompt,
         messages=[{"role": "user", "content": user_prompt}],
     )
     return "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
 
 
-def _call_gemini(user_prompt: str) -> str:
+def _call_gemini(system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
     from google import genai
     from google.genai import types
 
-    # API anahtarını açıkça belirtiyoruz
     api_key = os.getenv("GEMINI_API_KEY")
-    client = genai.Client(api_key=api_key)  
-    
-    # .env'den okuduğumuz tırnaksız model adını kullanıyoruz
+    client = genai.Client(api_key=api_key)
     model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-    
+
     resp = client.models.generate_content(
         model=model,
         contents=user_prompt,
         config=types.GenerateContentConfig(
-            temperature=0.5,
-            max_output_tokens=800,
-            system_instruction=SYSTEM_PROMPT,
+            temperature=temperature,
+            max_output_tokens=max_tokens,
+            system_instruction=system_prompt,
             thinking_config=types.ThinkingConfig(thinking_budget=0),
         ),
     )
     return resp.text or ""
 
 
-def _call_openrouter(user_prompt: str) -> str:
+def _call_openrouter(system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
     from openai import OpenAI
 
     api_key = os.getenv("OPENROUTER_API_KEY")
@@ -137,17 +198,15 @@ def _call_openrouter(user_prompt: str) -> str:
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
     )
-    # Varsayılan olarak kullanıcının belirttiği veya benzer bir ücretsiz / uygun modeli kullanalım
     model = os.getenv("OPENROUTER_MODEL", "openai/gpt-oss-20b:free")
     resp = client.chat.completions.create(
         model=model,
-        max_tokens=800,
-        temperature=0.5,
+        max_tokens=max_tokens,
+        temperature=temperature,
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        ThinkingConfig=ThinkingConfig(thinking_budget=0)
     )
     return resp.choices[0].message.content or ""
 
@@ -194,21 +253,6 @@ def _stub_report(result: ScoreResult) -> dict:
 # Kapsamlı Yol Haritası Raporu (Adım 5) — tüm metodoloji verileri birleşik
 # ===========================================================================
 
-COMPREHENSIVE_SYSTEM_PROMPT = (
-    "Sen StartMetrics platformunun strateji danışmanısın. Bir girişimcinin 4 aşamalık "
-    "analiz sürecinden elde edilen verilere bakarak kapsamlı, kişiselleştirilmiş ve "
-    "uygulanabilir bir stratejik yol haritası raporu yazacaksın. "
-    "Rapor Türkçe olacak. Markdown formatında olacak (## başlıklar, - madde işaretleri). "
-    "Şu bölümleri içermelidir: "
-    "## 🎯 Genel Değerlendirme (2-3 cümle özet), "
-    "## 💡 Kritik Bulgular (en önemli 3-5 tespit), "
-    "## 🗺️ 30 Günlük Eylem Planı (somut adımlar), "
-    "## 🚀 90 Günlük Büyüme Rotası (stratejik yönelim), "
-    "## ⚠️ Öncelikli Riskler ve Çözüm Önerileri. "
-    "Genel tavsiyeler değil, VERİLERE ÖZGÜ, uygulanabilir öneriler ver. "
-    "Motivasyon konuşması yapma."
-)
-
 
 def generate_comprehensive_report(
     branch: str,
@@ -223,23 +267,28 @@ def generate_comprehensive_report(
         {"roadmap": "<markdown metin>", "source": "llm" | "stub"}
     Bu fonksiyon hiçbir zaman exception fırlatmaz; hata durumunda stub'a düşer.
     """
-    provider = "openai"
-    api_key = os.getenv("OPENAI_API_KEY")
+    provider, api_key = _active_provider_and_key()
 
     if not api_key:
+        print(f"'{provider}' için API anahtarı bulunamadı, stub rapora düşülüyor.", flush=True)
         return _stub_comprehensive_report(score_result)
 
     try:
         user_prompt = _build_comprehensive_prompt(
             branch, step1_answers, methodology1_answers, methodology2_answers, score_result
         )
-        text = _call_openai_comprehensive(user_prompt)
+        text = _dispatch_call(
+            provider, COMPREHENSIVE_SYSTEM_PROMPT, user_prompt, max_tokens=1500, temperature=0.6
+        )
 
         return {"roadmap": text.strip(), "source": "llm"}
     except Exception as e:
-        print(f"generate_comprehensive_report LLM API Hatası: {e}", flush=True)
+        print(f"generate_comprehensive_report LLM API Hatası ({provider}): {e}", flush=True)
         fallback = _stub_comprehensive_report(score_result)
-        fallback["roadmap"] = f"### 🔴 Sistem Hatası (Lütfen Bunu Okuyun)\n**LLM API şu hatayı verdi:** `{e}`\n\n---\n\n" + fallback["roadmap"]
+        fallback["roadmap"] = (
+            f"### 🔴 Sistem Hatası (Lütfen Bunu Okuyun)\n**LLM API şu hatayı verdi:** `{e}`\n\n---\n\n"
+            + fallback["roadmap"]
+        )
         return fallback
 
 
@@ -271,75 +320,6 @@ def _build_comprehensive_prompt(
         f"=== ADIM 4: Metodoloji Formu-2 ===\n{json.dumps(metho2, ensure_ascii=False, indent=2)}\n\n"
         f"Yukarıdaki tüm verileri analiz ederek kapsamlı stratejik yol haritası raporunu yaz."
     )
-
-
-def _call_openai_comprehensive(user_prompt: str) -> str:
-    from openai import OpenAI
-    
-    api_key = os.getenv("OPENAI_API_KEY")
-    client = OpenAI(api_key=api_key)
-    model = os.getenv("OPENAI_MODEL", "gpt-4o")
-    resp = client.chat.completions.create(
-        model=model,
-        max_tokens=1500,
-        temperature=0.6,
-        messages=[
-            {"role": "system", "content": COMPREHENSIVE_SYSTEM_PROMPT},
-            {"role": "user", "content": user_prompt},
-        ],
-    )
-    return resp.choices[0].message.content or ""
-
-
-def _call_anthropic_comprehensive(user_prompt: str) -> str:
-    import anthropic
-    client = anthropic.Anthropic()
-    model = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
-    msg = client.messages.create(
-        model=model,
-        max_tokens=1500,
-        system=COMPREHENSIVE_SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_prompt}],
-    )
-    return "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
-
-
-def _call_gemini_comprehensive(user_prompt: str) -> str:
-    from google import genai
-    from google.genai import types
-
-    api_key = os.getenv("GEMINI_API_KEY")
-    client = genai.Client(api_key=api_key)
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-
-    resp = client.models.generate_content(
-        model=model,
-        contents=user_prompt,
-        config=types.GenerateContentConfig(
-            temperature=0.6,
-            max_output_tokens=2000,
-            system_instruction=COMPREHENSIVE_SYSTEM_PROMPT,
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
-        ),
-    )
-    return resp.text or ""
-
-
-def _call_openrouter_comprehensive(user_prompt: str) -> str:
-    from openai import OpenAI
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
-    model = os.getenv("OPENROUTER_MODEL", "openai/gpt-oss-20b:free")
-    resp = client.chat.completions.create(
-        model=model,
-        max_tokens=1500,
-        temperature=0.6,
-        messages=[
-            {"role": "system", "content": COMPREHENSIVE_SYSTEM_PROMPT},
-            {"role": "user", "content": user_prompt},
-        ],
-    )
-    return resp.choices[0].message.content or ""
 
 
 def _stub_comprehensive_report(result: ScoreResult) -> dict:
