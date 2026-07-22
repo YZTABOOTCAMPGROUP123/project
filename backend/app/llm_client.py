@@ -1,23 +1,16 @@
 """
-llm_client.py — AI Yön Raporu üretici (sağlayıcı-bağımsız + stub fallback).
+llm_client.py — AI Yön Raporu üretici (sadece OpenAI + stub fallback).
 
 Sorumluluk: skorlayıcının çıktısını ve ~8-10 alanı bir Türkçe mentor prompt'una
-gömüp LLM'den TAM 3 maddelik Waze/GPS tarzı bir navigasyon raporu almak.
-
-Sağlayıcı seçimi: LLM_PROVIDER ortam değişkeni ile yapılır
-(openai | anthropic | gemini | openrouter). Varsayılan: openai.
+gömüp OpenAI'den TAM 3 maddelik Waze/GPS tarzı bir navigasyon raporu almak.
 
 Token tasarrufu: prompt'a SADECE alanlar + skor girer; ASLA CSV satırı girmez.
 max_tokens düşük tutulur, tıklama başına tek çağrı yapılır.
 
-Dayanıklılık: seçili sağlayıcının API anahtarı yoksa VEYA çağrı/parse hatası
-olursa `_stub_report` devreye girer — demo asla çökmez, UI birebir aynı
-görünür (report_source="stub").
-
-NOT: google-genai / anthropic / openai gibi sağlayıcı SDK'ları burada
-FONKSİYON İÇİNDE import edilir (üst seviyede değil). Bunun nedeni: sadece
-kullandığın sağlayıcının paketinin requirements.txt'de olması yeterli olsun;
-diğer paketler kurulu olmasa bile modül import edilirken patlamasın.
+Dayanıklılık: OPENAI_API_KEY yoksa VEYA çağrı/parse hatası olursa `_stub_report`
+devreye girer — demo asla çökmez, UI birebir aynı görünür (report_source="stub").
+Hata durumunda gerçek exception mesajı raporun içine de yazılır, böylece
+Vercel'de arayüzden bile ne olduğunu görebilirsin.
 """
 
 from __future__ import annotations
@@ -56,43 +49,15 @@ COMPREHENSIVE_SYSTEM_PROMPT = (
     "Motivasyon konuşması yapma."
 )
 
-# Sağlayıcı adı -> o sağlayıcının API anahtarını tuttuğu ortam değişkeni
-_PROVIDER_KEY_ENV = {
-    "openai": "OPENAI_API_KEY",
-    "anthropic": "ANTHROPIC_API_KEY",
-    "gemini": "GEMINI_API_KEY",
-    "openrouter": "OPENROUTER_API_KEY",
-}
 
-
-def _active_provider_and_key() -> tuple[str, str | None]:
-    """LLM_PROVIDER ortam değişkenine göre aktif sağlayıcıyı ve anahtarını döndürür."""
-    provider = os.getenv("LLM_PROVIDER", "openai").strip().lower()
-    if provider not in _PROVIDER_KEY_ENV:
-        # Bilinmeyen bir değer yazılmışsa openai'ye düş (ama uyar).
-        print(f"Bilinmeyen LLM_PROVIDER='{provider}', 'openai' varsayılana dönülüyor.", flush=True)
-        provider = "openai"
-    api_key = os.getenv(_PROVIDER_KEY_ENV[provider])
-    return provider, api_key
-
-
-def _dispatch_call(
-    provider: str,
-    system_prompt: str,
-    user_prompt: str,
-    max_tokens: int,
-    temperature: float,
-) -> str:
-    """Aktif sağlayıcıya göre doğru _call_* fonksiyonunu çağırır."""
-    if provider == "openai":
-        return _call_openai(system_prompt, user_prompt, max_tokens, temperature)
-    if provider == "anthropic":
-        return _call_anthropic(system_prompt, user_prompt, max_tokens, temperature)
-    if provider == "gemini":
-        return _call_gemini(system_prompt, user_prompt, max_tokens, temperature)
-    if provider == "openrouter":
-        return _call_openrouter(system_prompt, user_prompt, max_tokens, temperature)
-    raise ValueError(f"Desteklenmeyen LLM_PROVIDER: {provider}")
+def _get_openai_key() -> str | None:
+    key = os.getenv("OPENAI_API_KEY")
+    if key:
+        # Debug için loglara maskeli bir onay basıyoruz (anahtarın kendisini asla loglama).
+        print(f"OPENAI_API_KEY bulundu (uzunluk={len(key)}, başlangıç={key[:7]}...)", flush=True)
+    else:
+        print("OPENAI_API_KEY bulunamadı (os.getenv None döndü).", flush=True)
+    return key
 
 
 def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
@@ -102,21 +67,20 @@ def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
         {"items": [{"title","body"} x3], "source": "llm" | "stub"}
     Bu fonksiyon hiçbir zaman exception fırlatmaz; hata durumunda stub'a düşer.
     """
-    provider, api_key = _active_provider_and_key()
+    api_key = _get_openai_key()
 
     if not api_key:
-        print(f"'{provider}' için API anahtarı bulunamadı, stub rapora düşülüyor.", flush=True)
         return _stub_report(result)
 
     try:
         user_prompt = _build_user_prompt(branch, features, result)
-        text = _dispatch_call(provider, SYSTEM_PROMPT, user_prompt, max_tokens=400, temperature=0.5)
+        text = _call_openai(SYSTEM_PROMPT, user_prompt, max_tokens=400, temperature=0.5)
 
         items = _parse_three_items(text)
         return {"items": items, "source": "llm"}
 
     except Exception as e:
-        print(f"generate_report LLM API Hatası ({provider}): {e}", flush=True)
+        print(f"generate_report OpenAI API Hatası: {e}", flush=True)
         fallback = _stub_report(result)
         fallback["items"][0]["body"] = f"🔴 API HATASI: {e} | " + fallback["items"][0]["body"]
         return fallback
@@ -124,7 +88,6 @@ def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
 
 def _build_user_prompt(branch: str, features: dict, result: ScoreResult) -> str:
     """Prompt'a sadece askable alanlar + skor girer (CSV satırı ASLA)."""
-    # Dahili yardımcı anahtarları (alt çizgiyle başlayan) prompt'a koyma.
     public = {k: v for k, v in features.items() if not k.startswith("_")}
     return (
         f"Dal: {branch}\n"
@@ -141,64 +104,7 @@ def _call_openai(system_prompt: str, user_prompt: str, max_tokens: int, temperat
 
     api_key = os.getenv("OPENAI_API_KEY")
     client = OpenAI(api_key=api_key)
-    model = os.getenv("OPENAI_MODEL", "gpt-4o")
-    resp = client.chat.completions.create(
-        model=model,
-        max_tokens=max_tokens,
-        temperature=temperature,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-    )
-    return resp.choices[0].message.content or ""
-
-
-def _call_anthropic(system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
-    import anthropic
-
-    client = anthropic.Anthropic()  # ANTHROPIC_API_KEY env'den okunur
-    model = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5")
-    msg = client.messages.create(
-        model=model,
-        max_tokens=max_tokens,
-        temperature=temperature,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_prompt}],
-    )
-    return "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
-
-
-def _call_gemini(system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
-    from google import genai
-    from google.genai import types
-
-    api_key = os.getenv("GEMINI_API_KEY")
-    client = genai.Client(api_key=api_key)
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-
-    resp = client.models.generate_content(
-        model=model,
-        contents=user_prompt,
-        config=types.GenerateContentConfig(
-            temperature=temperature,
-            max_output_tokens=max_tokens,
-            system_instruction=system_prompt,
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
-        ),
-    )
-    return resp.text or ""
-
-
-def _call_openrouter(system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
-    from openai import OpenAI
-
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=api_key,
-    )
-    model = os.getenv("OPENROUTER_MODEL", "openai/gpt-oss-20b:free")
+    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
     resp = client.chat.completions.create(
         model=model,
         max_tokens=max_tokens,
@@ -213,7 +119,6 @@ def _call_openrouter(system_prompt: str, user_prompt: str, max_tokens: int, temp
 
 def _parse_three_items(text: str) -> list[dict]:
     """LLM çıktısından tam 3 {title, body} maddesi çıkar."""
-    # Model bazen ```json ... ``` sarabilir; en dıştaki diziyi yakala.
     start = text.find("[")
     end = text.rfind("]")
     if start == -1 or end == -1:
@@ -267,26 +172,23 @@ def generate_comprehensive_report(
         {"roadmap": "<markdown metin>", "source": "llm" | "stub"}
     Bu fonksiyon hiçbir zaman exception fırlatmaz; hata durumunda stub'a düşer.
     """
-    provider, api_key = _active_provider_and_key()
+    api_key = _get_openai_key()
 
     if not api_key:
-        print(f"'{provider}' için API anahtarı bulunamadı, stub rapora düşülüyor.", flush=True)
         return _stub_comprehensive_report(score_result)
 
     try:
         user_prompt = _build_comprehensive_prompt(
             branch, step1_answers, methodology1_answers, methodology2_answers, score_result
         )
-        text = _dispatch_call(
-            provider, COMPREHENSIVE_SYSTEM_PROMPT, user_prompt, max_tokens=1500, temperature=0.6
-        )
+        text = _call_openai(COMPREHENSIVE_SYSTEM_PROMPT, user_prompt, max_tokens=1500, temperature=0.6)
 
         return {"roadmap": text.strip(), "source": "llm"}
     except Exception as e:
-        print(f"generate_comprehensive_report LLM API Hatası ({provider}): {e}", flush=True)
+        print(f"generate_comprehensive_report OpenAI API Hatası: {e}", flush=True)
         fallback = _stub_comprehensive_report(score_result)
         fallback["roadmap"] = (
-            f"### 🔴 Sistem Hatası (Lütfen Bunu Okuyun)\n**LLM API şu hatayı verdi:** `{e}`\n\n---\n\n"
+            f"### 🔴 Sistem Hatası (Lütfen Bunu Okuyun)\n**OpenAI API şu hatayı verdi:** `{e}`\n\n---\n\n"
             + fallback["roadmap"]
         )
         return fallback
@@ -300,7 +202,6 @@ def _build_comprehensive_prompt(
     result: ScoreResult,
 ) -> str:
     """Tüm adımların verilerini tek bir prompt'ta birleştirir."""
-    # Dahili anahtarları filtrele
     public_step1 = {k: v for k, v in step1.items() if not k.startswith("_")}
 
     branch_labels = {
