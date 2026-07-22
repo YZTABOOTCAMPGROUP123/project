@@ -40,48 +40,19 @@ def generate_report(branch: str, features: dict, result: ScoreResult) -> dict:
         {"items": [{"title","body"} x3], "source": "llm" | "stub"}
     Bu fonksiyon hiçbir zaman exception fırlatmaz; hata durumunda stub'a düşer.
     """
-    provider = os.getenv("LLM_PROVIDER")
-    if provider:
-        provider = provider.lower()
-    elif os.getenv("OPENAI_API_KEY"):
-        provider = "openai"
-    elif os.getenv("ANTHROPIC_API_KEY"):
-        provider = "anthropic"
-    elif os.getenv("GEMINI_API_KEY"):
-        provider = "gemini"
-    else:
-        provider = "openrouter"
-        
-    api_key = (
-        os.getenv("OPENAI_API_KEY")
-        or os.getenv("ANTHROPIC_API_KEY")
-        or os.getenv("GEMINI_API_KEY")
-        or os.getenv("OPENROUTER_API_KEY")
-    )
+    provider = "openai"
+    api_key = os.getenv("OPENAI_API_KEY")
 
     if not api_key:
         return _stub_report(result)
 
     try:
         user_prompt = _build_user_prompt(branch, features, result)
-        if provider == "openai":
-            text = _call_openai(user_prompt)
-        elif provider == "anthropic":
-            text = _call_anthropic(user_prompt)
-        elif provider == "gemini":
-            text = _call_gemini(user_prompt)
-        elif provider == "openrouter":
-            text = _call_openrouter(user_prompt)
-        else:
-            return _stub_report(result)
-
+        
+        text = _call_openai(user_prompt)
+        
         items = _parse_three_items(text)
-        return {"items": items, "source": "llm"}
-    except Exception as e:
-        # Ağ/parse/kota — ne olursa olsun demo çalışsın.
-        print(f"generate_report LLM API Hatası: {e}", flush=True)
-        return _stub_report(result)
-
+        return {"items": items, "source": "llm"} 
 
 def _build_user_prompt(branch: str, features: dict, result: ScoreResult) -> str:
     """Prompt'a sadece askable alanlar + skor girer (CSV satırı ASLA)."""
@@ -246,24 +217,8 @@ def generate_comprehensive_report(
         {"roadmap": "<markdown metin>", "source": "llm" | "stub"}
     Bu fonksiyon hiçbir zaman exception fırlatmaz; hata durumunda stub'a düşer.
     """
-    provider = os.getenv("LLM_PROVIDER")
-    if provider:
-        provider = provider.lower()
-    elif os.getenv("OPENAI_API_KEY"):
-        provider = "openai"
-    elif os.getenv("ANTHROPIC_API_KEY"):
-        provider = "anthropic"
-    elif os.getenv("GEMINI_API_KEY"):
-        provider = "gemini"
-    else:
-        provider = "openrouter"
-        
-    api_key = (
-        os.getenv("OPENAI_API_KEY")
-        or os.getenv("ANTHROPIC_API_KEY")
-        or os.getenv("GEMINI_API_KEY")
-        or os.getenv("OPENROUTER_API_KEY")
-    )
+    provider = "openai"
+    api_key = os.getenv("OPENAI_API_KEY")
 
     if not api_key:
         return _stub_comprehensive_report(score_result)
@@ -272,16 +227,8 @@ def generate_comprehensive_report(
         user_prompt = _build_comprehensive_prompt(
             branch, step1_answers, methodology1_answers, methodology2_answers, score_result
         )
-        if provider == "openai":
-            text = _call_openai_comprehensive(user_prompt)
-        elif provider == "anthropic":
-            text = _call_anthropic_comprehensive(user_prompt)
-        elif provider == "gemini":
-            text = _call_gemini_comprehensive(user_prompt)
-        elif provider == "openrouter":
-            text = _call_openrouter_comprehensive(user_prompt)
-        else:
-            return _stub_comprehensive_report(score_result)
+        
+        text = _call_openai_comprehensive(user_prompt)
 
         return {"roadmap": text.strip(), "source": "llm"}
     except Exception as e:
